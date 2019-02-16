@@ -1,0 +1,8 @@
+import request from '@/utils/request'
+
+// 查询班级列表
+export const getClassList = data =>
+  request({
+    url: '/a/class/classAbout/findPxxclassList',
+    data
+  })

@@ -1,0 +1,144 @@
+<template>
+  <div class="by-stages-box">
+    <div
+      v-for="(item, index) in byStages"
+      :key="index"
+      :class="{
+        'act-color': true,
+        'act-bg': item._selected,
+        'bought': item._bought,
+        pointer: isEdit
+      }"
+      @click="byStagesSelect(index)"
+    >
+      <i class="act-border"/>
+      分期
+      <span class="price-font">{{ index + 1 }}：{{ item._time }}</span> 月课次
+      <span class="price-font">￥{{ item._price }}</span>
+      <i class="act-border"/>
+    </div>
+  </div>
+</template>
+
+<script>
+import { parseTime } from '@/utils'
+export default {
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: true
+    },
+    byStages: {
+      type: Array,
+      default: () => []
+    }
+  },
+  watch: {
+    byStages: {
+      handler() {
+        this.byStages.forEach((item, index) => {
+          item._price = +item.otherRealPayment + +item.realPayment
+          item._time = parseTime(item.startDate, 'm') + '-' + parseTime(item.endDate, 'm')
+          if (item.paymentStatus === '2') {
+            item._bought = true
+          }
+          return item
+        })
+      },
+      deep: true,
+      immediate: true
+    }
+  },
+  methods: {
+    byStagesSelect(index) {
+      if (!this.isEdit) return
+      this.byStages.forEach((item, i) => {
+        this.$set(item, '_selected', false)
+        if (i <= index && item.paymentStatus !== '2') {
+          item._selected = true
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.by-stages-box {
+  display: flex;
+  flex-wrap: wrap;
+  padding-bottom: 5px;
+  > div {
+    height: 33px;
+    line-height: 33px;
+    padding: 0 10px;
+    margin-right: 8px;
+    position: relative;
+    margin-bottom: 8px;
+    transition: all 0.1s;
+    background: #ececec;
+    &.bought {
+      background: #ececec !important;
+      color: #53a22c !important;
+      cursor: default;
+      > i {
+        border-left-color: #ececec !important;
+      }
+    }
+    &:first-child:last-child {
+      border-radius: 3px;
+    }
+    &:not(.act-bg) {
+      > i {
+        border-left-color: #ececec !important;
+      }
+    }
+    &.act-bg:not(.bought) {
+      color: #fff !important;
+      &:not(:first-child) {
+        padding-left: 15px;
+        > i {
+          &:first-child {
+            border-left-color: #fbfcfc !important;
+          }
+        }
+      }
+    }
+    &:first-child {
+      border-radius: 3px 0 0 3px;
+      > i:first-child {
+        display: none;
+      }
+    }
+    &:last-child {
+      border-radius: 0 3px 3px 0;
+      > i:last-child {
+        display: none;
+      }
+    }
+    &:not(:first-child):not(.act-bg) {
+      padding-left: 15px;
+      > i {
+        border-left-color: #fbfcfc !important;
+        &:last-child {
+          border-left-color: #ececec !important;
+        }
+      }
+    }
+    > i {
+      position: absolute;
+      content: "";
+      top: 0;
+      border-top: 16px solid transparent !important;
+      border-bottom: 16px solid transparent !important;
+      border-left: 8px solid;
+      &:first-child {
+        left: 0;
+      }
+      &:last-child {
+        right: -8px;
+      }
+    }
+  }
+}
+</style>

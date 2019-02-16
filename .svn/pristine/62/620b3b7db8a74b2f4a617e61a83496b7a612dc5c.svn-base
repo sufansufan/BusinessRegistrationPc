@@ -1,0 +1,46 @@
+<template>
+  <section
+    :style="{minHeight: `calc(100vh - ${fastNav ? '186px' : '128px'})`}"
+    :class="{ 'app-main': true, 'not-home': key !== '/index' }"
+  >
+    <transition name="fade-transform" mode="out-in">
+      <keep-alive :include="cachedViews">
+        <router-view
+          :key="key"
+          :style="{minHeight: `calc(100vh - ${fastNav ? '206px' : '150px'})`}"
+        />
+      </keep-alive>
+    </transition>
+  </section>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: 'AppMain',
+  computed: {
+    ...mapGetters(['cachedViews', 'fastNav']),
+    key() {
+      const { fullPath, meta: { animation = true }} = this.$route
+      return animation ? fullPath : ''
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.app-main {
+  /*84 = navbar + tags-view = 50 +34 */
+  width: calc(100% - 44px);
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  &.not-home {
+    margin-bottom: 22px;
+    padding: 22px;
+    box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.65);
+    border-radius: 6px;
+  }
+}
+</style>

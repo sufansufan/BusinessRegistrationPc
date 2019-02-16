@@ -1,0 +1,25 @@
+/* Layout */
+import Layout from '@/views/layout/Layout'
+import apply from './apply'
+
+export default {
+  path: '/foreground',
+  component: Layout,
+  redirect: '/foreground/apply',
+  name: 'Foreground',
+  meta: {
+    title: '前台系统',
+    icon: 'foreground'
+  },
+  children: [
+    apply,
+    {
+      path: 'otherpayment',
+      component: () => import('@/views/foreground/otherPayment'),
+      name: 'OtherPayment',
+      meta: {
+        title: '其他收费'
+      }
+    }
+  ]
+}

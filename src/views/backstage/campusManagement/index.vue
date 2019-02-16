@@ -1,0 +1,49 @@
+<template>
+  <div class="campus-manage-content">
+    <campus-select @search ="search"/>
+    <el-tabs v-model="activeName">
+      <el-tab-pane label="校区管理" name="campusManage">
+        <campus-manage ref="campusManage"/>
+      </el-tab-pane>
+      <el-tab-pane label="财务主体管理" name="second">
+        <financia-entity-manage ref="financiaManage"/>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</template>
+
+<script>
+import CampusSelect from './components/CampusSelect'
+import CampusManage from './components/CampusManage'
+import FinanciaEntityManage from './components/FinanciaEntityManage'
+export default {
+  components: {
+    CampusSelect,
+    CampusManage,
+    FinanciaEntityManage
+  },
+  data() {
+    return {
+      activeName: 'campusManage'
+    }
+  },
+  methods: {
+    search(status) {
+      if (this.activeName === 'campusManage') {
+        this.$refs.campusManage.fetchData(status)
+      } else {
+        this.$refs.financiaManage.fetchData(status)
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.campus-manage-content{
+  .el-tabs__header{
+    margin-bottom: 8px;
+  }
+}
+
+</style>

@@ -1,0 +1,164 @@
+<template>
+  <div class="add-student-box">
+    <div class="add-student-box-left">
+      <div class="go-back">
+        <el-button type="goback" icon="el-icon-arrow-left" @click="$router.go(-1)">返回</el-button>
+      </div>
+      <h2 class="title">基本信息</h2>
+      <el-form :model="student" label-position="top" label-width="80px" size="midium">
+        <el-form-item label="姓名">
+          <el-input v-model="student.name" style="width: 217px;" placeholder="请输入姓名"/>
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-select v-model="student.sex" placeholder="请选择性别">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="年级">
+          <el-select v-model="student.sex" placeholder="请选择年级">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="常用电话">
+          <el-input v-model="student.type" style="width: 317px;" placeholder="请输入常用电话"/>
+        </el-form-item>
+        <el-form-item label="出生日期">
+          <el-date-picker v-model="student.type" type="date" placeholder="选择日期"/>
+        </el-form-item>
+        <el-form-item label="就读学校">
+          <div class="inline">
+            <el-select v-model="student.sex" placeholder="请选择学校">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+            <el-input v-model="student.type" style="width: 250px;" placeholder="请输入内容"/>
+          </div>
+        </el-form-item>
+        <el-form-item label="科目入学成绩">
+          <achievement/>
+        </el-form-item>
+        <el-form-item>
+          <div class="submit-btn">
+            <el-button type="primary" style="width: 300px;" @click="saveStudent">保存</el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="add-student-box-right">
+      <h2 class="title">更多信息</h2>
+      <el-form :model="student" label-position="top" label-width="80px" size="midium">
+        <el-form-item label="父亲姓名">
+          <el-input v-model="student.name" style="width: 217px;" placeholder="请输入姓名"/>
+        </el-form-item>
+        <el-form-item label="父亲电话">
+          <el-input v-model="student.name" style="width: 317px;" placeholder="请输入父亲电话"/>
+        </el-form-item>
+        <el-form-item label="母亲姓名">
+          <el-input v-model="student.name" style="width: 217px;" placeholder="请输入姓名"/>
+        </el-form-item>
+        <el-form-item label="母亲电话">
+          <el-input v-model="student.name" style="width: 317px;" placeholder="请输入母亲电话"/>
+        </el-form-item>
+        <el-form-item label="了解渠道">
+          <el-select v-model="student.sex" placeholder="请选择了解渠道">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="student.name" style="width: 317px;" placeholder="请输入邮箱"/>
+        </el-form-item>
+        <el-form-item label="身份证号">
+          <el-input v-model="student.name" style="width: 317px;" placeholder="请输入身份证号"/>
+        </el-form-item>
+        <el-form-item label="联系地址">
+          <el-input v-model="student.name" placeholder="请输入联系地址"/>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input :rows="4" v-model="student.textarea" type="textarea" placeholder="请输入备注"/>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>
+</template>
+
+<script>
+import Achievement from '@/views/components/Achievement'
+export default {
+  name: 'AddStudent',
+  components: {
+    Achievement
+  },
+  data() {
+    return {
+      student: {}
+    }
+  },
+  methods: {
+    saveStudent() {
+
+    }
+  }
+}
+</script>
+<style lang="scss">
+.add-student-box {
+  .el-form-item {
+    margin-bottom: 15px !important;
+    .el-form-item__label {
+      line-height: 28px;
+      padding: 0 !important;
+      color: #000;
+    }
+  }
+}
+</style>
+<style lang="scss" scoped>
+.add-student-box {
+  display: flex;
+  justify-content: space-between;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 22px;
+    height: calc(100% + 22px);
+    background: linear-gradient(to right, #f1f1f1, #f3f5f7, #f1f1f1);
+    margin-left: -11px;
+  }
+  &-left,
+  &-right {
+    width: calc(50% - 33px);
+  }
+  .go-back {
+    position: absolute;
+  }
+  .title {
+    text-align: center;
+    margin-top: 5px;
+  }
+  .submit-btn {
+    text-align: center;
+    padding-top: 30px;
+  }
+}
+</style>

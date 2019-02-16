@@ -1,0 +1,572 @@
+<template>
+  <div class="class-info-list-box">
+    <el-form ref="classForm" :model="classForm" :rules="classRules" label-position="top" size="midium" >
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="年份" prop="particularYear">
+            <el-select v-model="classForm.particularYear" clearable placeholder="请选择年份" style="width: 100%" >
+              <el-option
+                v-for="item in constant.particular_year"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="校区" prop="adminOrganId">
+            <el-cascader
+              :options="constant.campus"
+              v-model="classForm.adminOrganId"
+              :props="campusProps"
+              clearable
+              placeholder="校区"
+              change-on-select
+              style="width: 100%"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="教室" prop="searchList.classroomName">
+            <div class="class-search">
+              <el-cascader
+                :options="constant.campus"
+                v-model="classForm.searchList.classRoomCampusId"
+                :props="campusProps"
+                clearable
+                placeholder="请选择校区"
+                change-on-select
+                style="width: 50%"
+                @change="getClassRoom"/>
+              <el-autocomplete
+                v-model="classForm.searchList.classroomName"
+                :fetch-suggestions="queryClassRoom"
+                clearable
+                class="input-with-select"
+                popper-class="my-autocomplete"
+                placeholder="请输入教室"
+                style="width: 100%"
+                @select="classRoomSelect">
+                <template slot-scope="{ item }">
+                  <div class="name">{{ item.classroomName }}</div>
+                </template>
+              </el-autocomplete>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="季节" prop="season">
+            <el-select v-model="classForm.season" clearable placeholder="请选择季节" style="width: 100%">
+              <el-option
+                v-for="item in constant.season"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="老师" prop="searchList.teacherName">
+            <div class="class-search">
+              <el-cascader
+                :options="constant.campus"
+                v-model="classForm.searchList.teacherCampusId"
+                :props="campusProps"
+                clearable
+                placeholder="请选择校区"
+                change-on-select
+                style="width: 50%"
+                @change="getTeacter"/>
+              <el-autocomplete
+                v-model="classForm.searchList.teacherName"
+                :fetch-suggestions="queryTeacher"
+                clearable
+                class="input-with-select"
+                popper-class="my-autocomplete"
+                placeholder="请输入老师"
+                style="width: 100%"
+                @select="teacherSelect">
+                <template slot-scope="{ item }">
+                  <div class="name">{{ item.name }}</div>
+                </template>
+              </el-autocomplete>
+            </div>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="课程安排规律" prop="dateslotName">
+            <div class="class-search">
+              <el-cascader
+                :options="constant.campus"
+                v-model="classForm.searchList.dataSlotCampusId"
+                :props="campusProps"
+                clearable
+                placeholder="请选择校区"
+                change-on-select
+                style="width: 50%"
+                @change="getDateSlot"/>
+              <el-autocomplete
+                v-model="classForm.dateslotName"
+                :fetch-suggestions="queryDateSlot"
+                clearable
+                class="input-with-select"
+                popper-class="my-autocomplete"
+                placeholder="请输入课程安排规律"
+                style="width: 100%"
+                @select="dateSlotSelect">
+                <template slot-scope="{ item }">
+                  <div class="name">{{ item.name }}</div>
+                </template>
+              </el-autocomplete>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="期别">
+            <el-select v-model="classForm.periods" clearable placeholder="请选择期别" style="width: 100%">
+              <el-option
+                v-for="item in constant.periods"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="班级补充名称" prop="classSupplementName">
+            <el-input v-model.trim="classForm.classSupplementName" clearable placeholder="请输入班级补充名称"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="总课次" prop="totalTimes">
+            <el-input v-model.trim="classForm.totalTimes" clearable placeholder="请输入总课次"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="年级" prop="grade">
+            <el-select v-model="classForm.grade" clearable placeholder="请选择年级" style="width: 100%">
+              <el-option
+                v-for="item in constant.grade"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="分数线">
+            <el-input v-model.trim="classForm.minEntryScore" clearable placeholder="请输入分数线"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="周期" prop="classWeekDay">
+            <el-select v-model="classForm.classWeekDay" placeholder="请选择周期" multiple clearable style="width: 100%">
+              <el-option
+                v-for="item in constant.week_day_type"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="科目" prop="subject">
+            <el-select v-model="classForm.subject" clearable placeholder="请选择科目" style="width: 100%">
+              <el-option
+                v-for="item in constant.subject"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="价格" prop="totalPrice">
+            <el-input v-model.trim="classForm.totalPrice" clearable placeholder="请输入课价格"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="上课时段" prop="timeslotName">
+            <el-select v-model="classForm.timeslotName" clearable placeholder="请选择上课时段" style="width: 100%">
+              <el-option
+                v-for="item in timeslotList"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="类别" prop="projectType">
+            <el-select v-model="classForm.projectType" clearable placeholder="请选择类别" style="width: 100%">
+              <el-option
+                v-for="item in constant.project_type"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="招生人数" prop="maxStudentsNum">
+            <el-input v-model.trim="classForm.maxStudentsNum" clearable placeholder="请输入招生人数"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="其他选项">
+            <div class="class-checkbox">
+              <div>
+                <el-checkbox-button v-model="classForm.whetherShowApp" :label="true" style="width: 100%">APP显示</el-checkbox-button>
+              </div>
+              <div>
+                <el-checkbox-button v-model="classForm.whetherGenerationCharges" :label="true" style="width: 100%">代收费</el-checkbox-button>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="班型" prop="classType">
+            <el-select v-model="classForm.classType" clearable placeholder="请选择班型" style="width: 100%">
+              <el-option
+                v-for="item in constant.class_type"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="允许超额人数" prop="excessNum">
+            <el-input v-model.trim="classForm.excessNum" clearable placeholder="请输入允许超额人数"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item>
+            <div class="class-checkbox class-height">
+              <div>
+                <el-checkbox-button v-model="classForm.whetherAdmissionTest" :label="true" style="width: 100%">入学测试</el-checkbox-button>
+              </div>
+              <div>
+                <el-checkbox-button v-model="classForm.whetherHotClass" :label="true" style="width: 100%">热门班级</el-checkbox-button>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="转班条件" prop="turnClassCondition">
+            <el-select v-model="classForm.turnClassCondition" clearable placeholder="请选择转班条件" style="width: 100%">
+              <el-option
+                v-for="item in constant.turn_class_condition"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="大班标准人数" prop="bigclassStandardNum">
+            <el-input v-model.trim="classForm.bigclassStandardNum" clearable placeholder="请输入大班标准人数"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item>
+            <div class="class-checkbox class-height">
+              <div>
+                <el-checkbox-button v-model="classForm.whetherToAttend" :label="true" style="width: 100%">允许旁听</el-checkbox-button>
+              </div>
+              <div>
+                <el-checkbox-button v-model="classForm.whetherShowOnlyBackstage" :label="true" style="width: 100%">仅后台可见</el-checkbox-button>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import { getTeacherList } from '@/api/backstage/teacherManagement'
+import { getDateslotList, getPxxclassById } from '@/api/backstage/courseManagement'
+import { getClassroomList } from '@/api/backstage/classroomManagement'
+import { getTimeslotList } from '@/api/backstage/courseManagement'
+import { id2Level } from '@/utils'
+import { validateNumber, validateJustFloat } from '@/utils/validate'
+export default {
+  data() {
+    const number = (rule, value, callback) => {
+      if (!validateNumber(value)) {
+        callback(new Error('请输入数字'))
+      } else {
+        callback()
+      }
+    }
+    const justFloat = (rule, value, callback) => {
+      if (!validateJustFloat(value)) {
+        callback(new Error('请输入数字'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      classForm: {
+        id: '',
+        particularYear: '',
+        adminOrganId: [],
+        classroomId: '',
+        season: '',
+        teacherId: '',
+        dateslotId: '',
+        dateslotName: '',
+        periods: '',
+        classSupplementName: '',
+        className: '',
+        totalTimes: '',
+        grade: '',
+        minEntryScore: '',
+        turnClassCondition: '',
+        subject: '',
+        totalPrice: '',
+        timeslotName: '',
+        projectType: '',
+        maxStudentsNum: '',
+        classType: '',
+        excessNum: 5,
+        classWeekDay: [],
+        bigclassStandardNum: '',
+        whetherShowApp: '',
+        whetherAdmissionTest: '',
+        whetherToAttend: '',
+        whetherGenerationCharges: '',
+        whetherShowOnlyBackstage: '',
+        whetherHotClass: '',
+        searchList: {
+          teacherCampusId: [],
+          dataSlotCampusId: [],
+          classRoomCampusId: [],
+          teacherName: '',
+          classroomName: ''
+        }
+      },
+      classTitleInfo: {
+        className: '',
+        classInfo: '',
+        classMoney: ''
+      },
+      dateSlotList: [],
+      teacherList: [],
+      classRoomList: [],
+      timeslotList: [],
+      campusProps: {
+        value: 'id',
+        label: 'name'
+      },
+      classRules: {
+        particularYear: [{ required: true, message: '请选择年份', trigger: 'change' }],
+        adminOrganId: [{ required: true, message: '请选择校区', trigger: 'change' }],
+        'searchList.classroomName': [{ required: true, message: '请选择教室', trigger: 'change' }],
+        season: [{ required: true, message: '请选择季节', trigger: 'change' }],
+        'searchList.teacherName': [{ required: true, message: '请选择老师', trigger: 'change' }],
+        'dateslotName': [{ required: true, message: '请选择课程安排规律', trigger: 'change' }],
+        classSupplementName: [{ required: true, message: '请输入班级补充名称', trigger: 'blur' }],
+        totalTimes: [{ required: true, validator: number, trigger: 'blur' }],
+        grade: [{ required: true, message: '请选择年级', trigger: 'change' }],
+        classWeekDay: [{ required: true, message: '请选择周期', trigger: 'change' }],
+        subject: [{ required: true, message: '请选择科目', trigger: 'change' }],
+        totalPrice: [{ required: true, validator: justFloat, trigger: 'blur' }],
+        timeslotName: [{ required: true, message: '请选择上课时段', trigger: 'change' }],
+        projectType: [{ required: true, message: '请选择类别', trigger: 'change' }],
+        maxStudentsNum: [{ required: true, message: '请输入招生人数', trigger: 'blur' }],
+        classType: [{ required: true, message: '请选择班型', trigger: 'change' }],
+        excessNum: [{ required: true, validator: number, trigger: 'blur' }],
+        turnClassCondition: [{ required: true, message: '请选择转班条件', trigger: 'change' }],
+        bigclassStandardNum: [{ required: true, validator: number, trigger: 'change' }]
+
+      }
+    }
+  },
+  computed: {
+    ...mapGetters(['constant'])
+  },
+  watch: {
+    'classForm': {
+      handler() {
+        const { particularYear, season, subject, grade, classType, classSupplementName, totalTimes, classWeekDay, turnClassCondition, whetherAdmissionTest, minEntryScore, totalPrice } = this.classForm
+        this.classTitleInfo.className = this.getNameForValue(particularYear, 'particular_year') + this.getNameForValue(season, 'season') + this.getNameForValue(subject, 'subject') + this.getNameForValue(grade, 'grade') + this.getNameForValue(classType, 'class_type') + classSupplementName
+        var whetherStr = ''
+        if (whetherAdmissionTest) {
+          whetherStr = `入学测试 分数线 ${minEntryScore}`
+        }
+        this.classTitleInfo.classInfo = '总课次' + ' ' + totalTimes + ' ' + this.getNameForValue(classWeekDay, 'week_day_type') + ' ' + this.getNameForValue(turnClassCondition, 'turn_class_condition') + ' ' + whetherStr
+        this.classTitleInfo.classMoney = totalPrice
+        this.$emit('getClassName', this.classTitleInfo)
+      },
+      deep: true
+    }
+  },
+  created() {
+    this.$store.dispatch('getConstant', ['particular_year', 'campus', 'season', 'periods', 'grade', 'subject', 'timeslot_type', 'project_type', 'class_type', 'week_day_type', 'department_type', 'turn_class_condition']).then(() => {
+      const { id } = this.$route.params
+      if (id) {
+        this.fetchTeacherInfo(id)
+      }
+      this.getTimeslot()
+    })
+  },
+  methods: {
+    getNameForValue(val, type) {
+      if (!val) return ''
+      if (Array.isArray(val)) {
+        if (val.length) {
+          return this.constant[type].filter(item => (item.value === val[0]))[0].label
+        } else {
+          return ' '
+        }
+      } else {
+        return this.constant[type].filter(item => (item.value === val))[0].label
+      }
+    },
+    getTeacter() {
+      const { teacherCampusId } = this.classForm.searchList
+      getTeacherList({ adminOrganIds: teacherCampusId[teacherCampusId.length - 1], teacherStatus: true }).then(({ data }) => {
+        this.teacherList = data.list
+      })
+    },
+    getDateSlot() {
+      const { dataSlotCampusId } = this.classForm.searchList
+      getDateslotList({ adminOrganIds: dataSlotCampusId[dataSlotCampusId.length - 1] }).then(({ data }) => {
+        this.dateSlotList = data.list
+      })
+    },
+    getClassRoom() {
+      const { classRoomCampusId } = this.classForm.searchList
+      const params = {
+        adminOrganIds: classRoomCampusId && classRoomCampusId[classRoomCampusId.length - 1],
+        classroomStatus: true
+      }
+      getClassroomList(params).then(({ data }) => {
+        this.classRoomList = data.list
+      })
+    },
+    getTimeslot() {
+      getTimeslotList({ timeslotStatus: true }).then(({ data }) => {
+        this.timeslotList = data.list
+        this.timeslotList.map(item => {
+          item.name = item.startTime + '-' + item.endTime
+        })
+      })
+    },
+    queryTeacher(queryString, cb) {
+      var results = queryString ? this.teacherList.filter(item => (item.name === queryString)) : this.teacherList
+      cb(results)
+    },
+    queryDateSlot(queryString, cb) {
+      var results = queryString ? this.dateSlotList.filter(item => (item.name === queryString)) : this.dateSlotList
+      cb(results)
+    },
+    queryClassRoom(queryString, cb) {
+      var results = queryString ? this.classRoomList.filter(item => (item.name === queryString)) : this.classRoomList
+      cb(results)
+    },
+    teacherSelect(val) {
+      this.classForm.teacherId = val.id
+      this.classForm.searchList.teacherName = val.name
+    },
+    dateSlotSelect(val) {
+      const { id, name, courseTimes, classWeekDay } = val
+      this.classForm.totalTimes = courseTimes
+      this.classForm.classWeekDay = classWeekDay.split(',')
+      this.classForm.dateslotId = id
+      this.classForm.dateslotName = name
+    },
+    classRoomSelect(val) {
+      this.classForm.searchList.classroomName = val.classroomName
+      this.classForm.classroomId = val.id
+    },
+    fetchTeacherInfo(id) {
+      getPxxclassById({ id }).then(({ data }) => {
+        const { adminOrganId, classroomName, teacherName, classWeekDay } = data.pxxclass
+        this.classForm = {
+          ...data.pxxclass,
+          adminOrganId: id2Level(this.constant.campus, adminOrganId),
+          classWeekDay: classWeekDay.split(','),
+          searchList: {
+            teacherCampusId: [],
+            dataSlotCampusId: [],
+            classRoomCampusId: [],
+            teacherName: teacherName,
+            classroomName: classroomName
+          }
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.class-info-list-box{
+  .el-form-item{
+    .class-checkbox{
+      display: flex;
+      justify-content: space-between;
+      & > div{
+        width: calc(50% - 11px);
+      }
+      &.class-height{
+        margin-top: 37px;
+      }
+    }
+  }
+}
+</style>
+<style lang="scss">
+.class-info-list-box{
+  .el-checkbox-button:last-child .el-checkbox-button__inner{
+    border-radius: 4px;
+    width: 100%;
+  }
+  .class-search{
+    display: flex;
+    width: 100%;
+    .input-with-select {
+      .el-input-group__prepend {
+        width: 33%;
+      }
+      .el-input__inner{
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
+    .el-cascade .el-input, .el-cascader .el-input__inner{
+      border-right: none;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+     }
+  }
+}
+</style>

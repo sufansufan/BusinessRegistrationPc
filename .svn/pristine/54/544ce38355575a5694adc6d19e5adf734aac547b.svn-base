@@ -1,0 +1,138 @@
+<template>
+  <div class="student-info-box">
+    <div class="student-info-box-left">
+      <h2>
+        王鑫宇
+        <img :src="sexImg">
+      </h2>
+      <p>
+        <span>八年级</span>
+        <span>18623434322</span>
+        <span>推荐码-WERWRE2452</span>
+        <span class="act-color">数学 - 60</span>
+        <span class="act-color">语文 - 60</span>
+      </p>
+      <p>
+        <span>2015-03-22</span>
+        <span>41030132571</span>
+        <span>河南省中心小学</span>
+        <span>中州</span>
+        <span>父-13800000000</span>
+        <span>母-13800000000</span>
+      </p>
+    </div>
+    <div :class="{opend}" class="student-info-box-right">
+      <div class="switch-btn act-color" @click="opend = !opend">
+        <template v-if="opend">
+          <i class="el-icon-close" title="关闭"/>
+        </template>
+        <template v-else>
+          <span>编辑</span>
+          <i class="el-icon-d-arrow-left"/>
+        </template>
+      </div>
+      <div v-show="opend" class="student-info-box-right-content">
+        <achievement :is-edit="true"/>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import man from '@/assets/images/sex-man.png'
+import women from '@/assets/images/sex-women.png'
+import Achievement from '@/views/components/Achievement'
+export default {
+  components: {
+    Achievement
+  },
+  data() {
+    return {
+      sex: '1',
+      opend: false
+    }
+  },
+  computed: {
+    sexImg() {
+      return this.sex === '0' ? man : women
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.student-info-box {
+  height: 92px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  &::before {
+    content: "";
+    position: absolute;
+    top: -11px;
+    left: -25px;
+    width: 3px;
+    height: calc(100% + 22px);
+  }
+  &-left {
+    h2 {
+      margin: 0 0 20px 0;
+      display: flex;
+      align-items: center;
+      img {
+        padding-left: 10px;
+      }
+    }
+    > p {
+      margin: 10px 0 0 0;
+      &:last-child {
+        span {
+          color: #929191;
+        }
+      }
+      span {
+        padding-right: 15px;
+      }
+    }
+  }
+  &-right {
+    position: absolute;
+    top: -22px;
+    right: -22px;
+    background: #f9f9f9;
+    width: 50px;
+    height: calc(100% + 44px);
+    transition: width 0.3s;
+    &.opend {
+      width: 500px;
+      .switch-btn {
+        top: 20px;
+        right: 20px;
+      }
+    }
+    &::before {
+      content: "";
+      position: absolute;
+      left: -45px;
+      background: #f9f9f9;
+      border-radius: 50%;
+      width: 90px;
+      height: 100%;
+    }
+    .switch-btn {
+      position: absolute;
+      top: 50%;
+      right: 30px;
+      z-index: 4;
+      transform: translateY(-50%);
+      width: 10px;
+      cursor: pointer;
+    }
+    &-content {
+      position: relative;
+      z-index: 3;
+      padding: 22px 22px 0 0;
+    }
+  }
+}
+</style>

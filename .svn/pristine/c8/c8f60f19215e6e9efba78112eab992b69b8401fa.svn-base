@@ -1,0 +1,80 @@
+<template>
+  <div class="user-group-management-box">
+    <div class="select-tools">
+      <div class="btn">
+        <div>
+          <el-button type="primary" icon="el-icon-plus" @click="userGroupSetting">新增</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="date" label="用户组名称"/>
+      <el-table-column prop="date" label="关联人数"/>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button type="text" @click="userGroupSetting('edit', scope.row)">编辑</el-button>
+          <el-button type="text">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      class="campus-pagination"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <Dialog ref="dialog" width="600px">
+      <el-form :inline="true" :model="posGroupManagementForm" label-position="top">
+        <el-form-item label="角色名称">
+          <el-input v-model="posGroupManagementForm.user" placeholder="角色名称"/>
+        </el-form-item>
+        <el-form-item>
+          <el-tree
+            :data="userGroupData"
+            style="width: 200px;"
+            show-checkbox
+            default-expand-all
+            highlight-current
+          />
+        </el-form-item>
+        <el-form-item class="btn">
+          <el-button type="primary">确定</el-button>
+          <el-button @click="$refs.dialog.show = false">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </Dialog>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import Dialog from '@/components/Dialog'
+export default {
+  components: {
+    Dialog
+  },
+  mixins: [tables],
+  data() {
+    return {
+      dataList: [{}],
+      posGroupManagementForm: {},
+      userGroupData: []
+    }
+  },
+  methods: {
+    userGroupSetting(type, row) {
+      const dialog = this.$refs.dialog
+      dialog.setTitle('新增用户组')
+      if (type === 'edit') {
+        dialog.setTitle('编辑用户组')
+      }
+      dialog.show = true
+    }
+  }
+}
+</script>

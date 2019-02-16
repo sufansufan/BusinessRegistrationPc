@@ -1,0 +1,134 @@
+import request from '@/utils/request'
+
+// 查询班级列表
+export const getClassList = data =>
+  request({
+    url: '/a/class/classAbout/findPxxclassList',
+    data
+  })
+
+// 获取时段列表
+export const getTimeslotList = data =>
+  request({
+    url: '/a/backgroundSystem/timeslot/findTimeslotList',
+    data
+  })
+
+// 新增编辑保存段信息
+export const editTimeslot = data =>
+  request({
+    url: '/a/backgroundSystem/timeslot/editTimeslot',
+    data
+  })
+
+// 删除时段
+export const deleteTimeslot = data =>
+  request({
+    url: '/a/backgroundSystem/timeslot/deleteTimeslot',
+    data
+  })
+
+// 时段状态修改
+export const editTimeslotStatus = data =>
+  request({
+    url: '/a/backgroundSystem/timeslot/editTimeslotStatus',
+    data
+  })
+
+// 查询课程安排规律列表
+export const getDateslotList = data =>
+  request({
+    url: '/a/backgroundSystem/dateslot/findDateslotList',
+    data
+  })
+
+// 通过安排规律id获取详情
+export const getDateslotById = data =>
+  request({
+    url: '/a/backgroundSystem/dateslot/getDateslotById',
+    data
+  })
+
+// 编辑课程安排规律
+export const editDateslot = data =>
+  request({
+    url: '/a/backgroundSystem/dateslot/editDateslot',
+    data
+  })
+
+// 停用启用课程安排规律
+export const editDateslotStatus = data =>
+  request({
+    url: '/a/backgroundSystem/dateslot/editDateslotStatus',
+    data
+  })
+
+// 删除安排规律信息
+export const deleteDateslot = data =>
+  request({
+    url: '/a/backgroundSystem/dateslot/deleteDateslot',
+    data
+  })
+
+// 查询班级列表
+export const getPxxclassList = data =>
+  request({
+    url: '/a/class/classAbout/findPxxclassList',
+    data
+  })
+
+// 新增编辑保存班级信息
+export const editPxxclass = data =>
+  request({
+    url: '/a/class/classAbout/editPxxclass',
+    data
+  })
+
+// 根据班级id获取班级详情
+export const getPxxclassById = data =>
+  request({
+    url: '/a/class/classAbout/getPxxclassById',
+    data
+  })
+
+// 新增编辑班级第二步保存
+export const editAttendClassForEditPxxcalss = data =>
+  request({
+    url: '/a/class/classAbout/editAttendClassForEditPxxcalss',
+    data
+  })
+
+// 班级上架下架接口
+export const editPxxclassStatus = data =>
+  request({
+    url: '/a/class/classAbout/editPxxclassStatus',
+    data
+  })
+
+// 删除班级
+export const deletePxxclass = data =>
+  request({
+    url: '/a/class/classAbout/deletePxxclass',
+    data
+  })
+
+// 新增编辑课程标签
+export const editSysDict = data =>
+  request({
+    url: '/a/backgroundSystem/sysDict/editSysDict',
+    data
+  })
+
+// 删除课程标签
+export const deleteSysDict = data =>
+  request({
+    url: '/a/backgroundSystem/sysDict/deleteSysDict',
+    data
+  })
+
+// 修改课程标签顺序
+export const editSysDictSort = data =>
+  request({
+    url: '/a/backgroundSystem/sysDict/editSysDictSort',
+    data
+  })

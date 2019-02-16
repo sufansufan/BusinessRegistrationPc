@@ -1,0 +1,267 @@
+
+<template>
+  <div class="campus-management-box">
+    <div class="campus-content">
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <div class="grid-content">
+            <el-tree
+              :data="treeData"
+              :props="defaultProps"
+              :expand-on-click-node="false"
+              default-expand-all
+              node-key="id"
+              class="campus-tree">
+              <span slot-scope="{ node, data }" class="campus-tree-node">
+                <span>{{ node.label }}</span>
+                <span>
+                  <el-button type="text" size="mini" @click="() => append(data)"> <i class="el-icon-delete"/> </el-button>
+                  <el-button type="text" size="mini" @click="() => append(data)">  <i class="el-icon-edit"/></el-button>
+                  <el-button type="text" size="mini" @click="() => remove(node, data)"> <i class="el-icon-plus"/></el-button>
+                </span>
+              </span>
+            </el-tree>
+          </div>
+        </el-col>
+        <el-col :span="18">
+          <el-table :data="dataList" stripe border style="width: 100%">
+            <el-table-column prop="date" label="校区名称"/>
+            <el-table-column prop="name" label="财务主体" width="150"/>
+            <el-table-column prop="address" label="教室数"/>
+            <el-table-column prop="address" label="行政区域"/>
+            <el-table-column prop="address" label="详细地址"/>
+            <el-table-column prop="address" label="电话"/>
+            <el-table-column prop="address" label="创建时间"/>
+            <el-table-column prop="address" label="状态" width="150"/>
+            <el-table-column label="操作" width="250" fixed="right">
+              <template slot-scope="scope">
+                <el-button type="text" @click="modifyCampus('edit',scope.row)">编辑</el-button>
+                <el-button type="text">停用</el-button>
+                <el-button type="text">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-col>
+      </el-row>
+    </div>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      class="campus-pagination"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <Dialog ref="dialog">
+      <el-form ref="campusForm" :model="campusForm" class="campus-form">
+        <el-form-item label="所属组织架构">
+          <el-input v-model="campusForm.name"/>
+        </el-form-item>
+        <el-form-item label="名称">
+          <el-select v-model="campusForm.region" placeholder="请选择活动区域">
+            <el-option label="区域一" value="shanghai"/>
+            <el-option label="区域二" value="beijing"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="类型">
+          <el-radio-group v-model="campusForm.region" size="mini">
+            <el-radio-button label="00001">节点</el-radio-button>
+            <el-radio-button label="00002">校区</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="财务主体">
+          <el-input v-model="campusForm.name"/>
+        </el-form-item>
+        <el-form-item label="联系电话">
+          <el-select v-model="campusForm.region" placeholder="请选择活动区域">
+            <el-option label="区域一" value="shanghai"/>
+            <el-option label="区域二" value="beijing"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="地址选择">
+          <el-input v-model="campusForm.name"/>
+        </el-form-item>
+        <div class="campus-map-box">
+          <div>
+            <div id="map-container"/>
+          </div>
+          <div>
+            <el-form-item label="详细地址">
+              <el-input v-model="campusForm.name"/>
+            </el-form-item>
+            <el-form-item label="经度">
+              <el-input v-model="campusForm.name"/>
+            </el-form-item>
+            <el-form-item label="纬度">
+              <el-input v-model="campusForm.name"/>
+            </el-form-item>
+            <el-form-item>
+              <div :class="{'check-button': buttonStatus, 'button-action': true}">
+                <el-button size="big" @click="modifyStatus">拖动地图自动修改经纬度</el-button>
+              </div>
+            </el-form-item>
+          </div>
+        </div>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="big" @click="$refs.dialog.show = false">取 消</el-button>
+        <el-button type="primary" size="big">确 定</el-button>
+      </span>
+    </Dialog>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import Dialog from '@/components/Dialog'
+import { initMap } from '@/plugins/map.js'
+export default {
+  name: 'CampusManagement',
+  components: {
+    Dialog
+  },
+  mixins: [tables],
+  data() {
+    return {
+      select: {
+        state: ''
+      },
+      dataList: [{
+        address: '12312'
+      }],
+      campusForm: {
+        name: '',
+        region: ''
+      },
+      buttonStatus: true,
+      treeData: [],
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      }
+    }
+  },
+  methods: {
+    modifyCampus(type) {
+      type === 'edit' ? this.$refs.dialog.setTitle('编辑校区') : this.$refs.dialog.setTitle('新增校区')
+      this.$refs.dialog.show = true
+      this.initMap()
+    },
+    append(data) {
+
+    },
+    remove(node, data) {
+    },
+    modifyStatus() {
+      this.buttonStatus = !this.buttonStatus
+    },
+    initMap() {
+      initMap()
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.campus-management-box{
+  .campus-content{
+    .grid-content{
+      min-height: calc(100vh - 270px);
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 10px;
+      .campus-tree{
+        background: none;
+        font-size: 16px;
+        .campus-tree-node {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 16px;
+          padding-right: 8px;
+        }
+      }
+    }
+  }
+  .campus-pagination {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+  .campus-form{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    .el-form-item{
+      width: calc(33% - 10px);
+      .el-select, .el-input, .el-radio-group{
+        width: 100%;
+      }
+    }
+    .campus-map-box{
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      & > div:first-child{
+        width: calc(67% - 10px);
+        min-height: 500px;
+        overflow: hidden;
+        #map-container{
+          width: 100%;
+          min-height: 500px;
+        }
+      }
+      & > div {
+        width: calc(33% - 10px);
+        .el-form-item{
+          width: 100%;
+          .el-select, .el-input{
+            width: 100%;
+          }
+          .button-action{
+            .el-button{
+              color: #5a5e66;
+              &:hover, &:focus{
+                background: none;
+                color: none;
+                border-color: #d8dce5;
+              }
+            }
+          }
+          .check-button{
+            .el-button{
+              color: #c19b62;
+              border-color: #c19b62 !important;
+              position: relative;
+              &:hover, &:focus{
+                background: none;
+              }
+              &:after{
+                content: '\2714';
+                position: absolute;
+                top: -4%;
+                right: -2%;
+                color:#c19b62;
+                background: #fff;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>
+<style lang="scss">
+  .campus-management-box{
+    .campus-content{
+      .el-tree-node__label{
+        font-size: 16px;
+        color: #000;
+      }
+    }
+  }
+</style>

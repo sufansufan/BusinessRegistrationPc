@@ -1,0 +1,17 @@
+// 引入地图
+import maps from 'qqmap'
+
+export function initMap() {
+  maps.init('CKMBZ-K26RX-DSS43-Z2TTF-VWDBZ-BYFE5', () => {
+    const myLating = new maps.LatLng(39.916527, 116.397128)
+    const myOptions = {
+      zoom: 8,
+      center: myLating,
+      mapTypeId: maps.MapTypeId.ROADMAP
+    }
+    new maps.Map(
+      document.getElementById('map-container'),
+      myOptions
+    )
+  })
+}

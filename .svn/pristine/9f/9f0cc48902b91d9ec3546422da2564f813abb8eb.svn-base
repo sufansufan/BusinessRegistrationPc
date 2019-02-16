@@ -1,0 +1,153 @@
+<template>
+  <div class="table-box">
+    <el-table :data="tableData" stripe border style="width: 100%">
+      <template v-for="(row, index) in tableRow">
+        <el-table-column
+          v-if="(!row._child || !row.type || !row.pre) && row.prop !== 'operation'"
+          :key="index"
+          :prop="row.prop"
+          :label="row.label"
+          :width="row.width || 'auto'"
+          :fixed="row.fixed || false"
+        />
+        <el-table-column
+          v-else
+          :key="index"
+          :width="row.width || 'auto'"
+          :label="row.label"
+          :fixed="row.fixed || false"
+        >
+          <template slot-scope="scope">
+            <template v-if="!scope.row._child">
+              <template v-if="row.prop === 'operation'">
+                <slot :row="scope.row"/>
+              </template>
+              <template v-else-if="scope.row.type">
+                <span class="price-font">{{ row.pre }}{{ scope.row[row.prop] }}</span>
+              </template>
+              <template v-else>
+                <span>{{ row.pre }}{{ scope.row[row.prop] }}</span>
+              </template>
+            </template>
+            <template v-else>
+              <div v-for="child in row[childType]" :key="child.id" class="child-list">
+                <div v-if="row.prop === 'selection'">
+                  <el-checkbox/>
+                </div>
+                <div v-else-if="typeof row.prop === 'object'">
+                  <span
+                    v-for="(v, index) in row.prop"
+                    :key="index"
+                  >{{ o[v] }}{{ index !== row.prop.length - 1 ? '/' : '' }}</span>
+                </div>
+                <div v-else-if="row.prop === 'operation'">
+                  <slot :row="scope.row"/>
+                </div>
+                <div v-else-if="!o[row.prop]" class="is-empty">N/A</div>
+                <div v-else-if="row.type">
+                  <span class="price-font">{{ row.pre }}{{ o[row.prop] }}</span>
+                </div>
+                <div v-else :title="o[row.prop]">{{ o[row.prop] }}</div>
+              </div>
+            </template>
+          </template>
+        </el-table-column>
+      </template>
+    </el-table>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    tableData: {
+      type: Array,
+      default: () => []
+    },
+    tableConfig: {
+      type: Array,
+      default: () => []
+    },
+    childType: {
+      type: String,
+      default: 'order'
+    }
+  },
+  created() {
+    this.tableRow = JSON.parse(JSON.stringify(this.tableConfig))
+    this.tableRow = this.tableRow.map((row, index) => {
+      row._child = false
+      if (Array.isArray(row)) {
+        row.forEach(item => (item._child = true))
+        this.tableRow.splice(index, 1, ...row)
+      }
+      return row
+    })
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.table-box {
+  .el-pagination:first-of-type {
+    margin-top: 0;
+  }
+  > div {
+    margin-bottom: 25px;
+    .child-list {
+      height: 33px;
+      line-height: 33px;
+      position: relative;
+      .is-empty {
+        font-size: 12px;
+      }
+      .price-font {
+        font-size: 16px;
+      }
+      > div {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      &:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: -10px;
+        bottom: -1px;
+        width: calc(100% + 20px);
+        height: 1px;
+        background: #eee;
+      }
+    }
+  }
+  &-title {
+    &-left {
+      display: flex;
+      align-items: flex-start;
+      .tit {
+        text-align: center;
+      }
+    }
+    &-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+    }
+    .tit {
+      margin: 0 10px 10px 0;
+      padding: 0 10px;
+      line-height: 33px;
+      background: #eaeaea;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      > span:first-child {
+        color: #707070;
+        &:not(:only-of-type) {
+          padding-right: 10px;
+        }
+      }
+    }
+  }
+}
+</style>

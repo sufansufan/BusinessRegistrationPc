@@ -1,0 +1,237 @@
+<template>
+  <div>
+    <refund-content
+      :is-edit="true"
+      :order="order"
+      :other-order="otherOrder"
+      :attend-list="attendList"
+    >
+      <template slot="refundInfo">
+        <el-form ref="refundForm" :model="refundForm" :rules="rules" label-width="80px" inline>
+          <el-form-item label="退费方式" prop="refundPayType">
+            <el-select v-model="refundForm.refundPayType" placeholder="请选择">
+              <el-option
+                v-for="item in constant.refund_pay_type"
+                :key="item.id"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="姓名" prop="bankCardPayee">
+            <el-input v-model="refundForm.bankCardPayee" placeholder="请填写"/>
+          </el-form-item>
+          <el-form-item label="银行名称" prop="bankName">
+            <el-input v-model="refundForm.bankName" placeholder="请填写"/>
+          </el-form-item>
+          <el-form-item label="银行卡号" prop="bankcardNo">
+            <el-input v-model="refundForm.bankcardNo" placeholder="请填写"/>
+          </el-form-item>
+          <el-form-item label="退费原因" prop="refundReason" class="reason">
+            <el-select v-model="refundReaonType" placeholder="请选择退费类型" @change="insertReason">
+              <el-option
+                v-for="item in constant.refund_reaon_type"
+                :key="item.id"
+                :label="item.label"
+                :value="item.label"
+              />
+            </el-select>
+            <el-select v-model="refundReson" placeholder="请选择退费具体原因" @change="insertReason">
+              <el-option
+                v-for="item in constant.refund_reson"
+                :key="item.id"
+                :label="item.label"
+                :value="item.label"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="备注" prop="refundRemark">
+            <el-input v-model="refundForm.refundRemark" placeholder="请填写"/>
+          </el-form-item>
+        </el-form>
+      </template>
+      <template slot="refundBtn">
+        <el-button @click="$router.go(-1)">取消</el-button>
+        <el-button type="primary" @click="refund">退费</el-button>
+      </template>
+    </refund-content>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import RefundContent from './components/RefundContent'
+import { getApplyRefund, applyRefund } from '@/api/foreground/apply'
+import { parseTime, deepClone } from '@/utils'
+export default {
+  components: {
+    RefundContent
+  },
+  data() {
+    return {
+      order: [],
+      otherOrder: [],
+      attendList: [],
+      refundForm: {
+        refundPayType: '1',
+        bankCardPayee: '',
+        bankName: '',
+        bankcardNo: '',
+        refundReason: '',
+        refundRemark: ''
+      },
+      refundReaonType: '',
+      refundReson: '',
+      rules: {
+        refundPayType: [{ required: true, message: '请选择退费方式' }],
+        bankCardPayee: [{ required: true, message: '请填写姓名' }],
+        bankName: [{ required: true, message: '请填写银行名称' }],
+        bankcardNo: [{ required: true, message: '请填写银行卡号' }],
+        refundReason: [{ required: true, message: '请选择退费类型和原因' }]
+      }
+    }
+  },
+  computed: {
+    ...mapGetters(['constant'])
+  },
+  created() {
+    this.$store.dispatch('getConstant', ['refund_pay_type', 'refund_reaon_type', 'refund_reson'])
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      getApplyRefund({ Loading: true, ids: this.$route.query.ids }).then(res => {
+        this.order = res.data.list.filter(item => {
+          if (item.otherName) {
+            this.otherOrder.push(item)
+            return false
+          } else {
+            item.payAttend.map(item => (item.workdate = parseTime(item.workdate, 'm-d')))
+            this.$set(item, '_refundNum', item.payAttend
+              .filter(item => item.whetherRefund).length)
+            this.$set(item, '_refundPrice', item.payAttend
+              .filter(item => item.whetherRefund)
+              .map(item => item.amount)
+              .reduce((s, n) => +s + +n, 0))
+            this.$set(item, '_otherRefundAmount', 0)
+            this.$set(item, '_otherRefundRemark', '')
+            this.$set(item, '_totalAmountPrice', item._refundPrice + item._otherRefundAmount)
+            this.$set(item, '_refundAttendClassIds', item.payAttend.filter(item => item.whetherRefund).map(item => item.id).join(','))
+          }
+          return true
+        })
+        this.attendList = this.order.map(item => ({ [item.classId]: deepClone(item.payAttend) }))
+      })
+    },
+    insertReason(val) {
+      if (this.refundReaonType && this.refundReson) {
+        this.refundForm.refundReason = this.refundReaonType + '/' + this.refundReson
+      }
+    },
+    refund() {
+      this.$refs.refundForm.validate().then(() => {
+        const order = this.order.map(item => {
+          const { id,
+            _refundAttendClassIds,
+            _refundPrice,
+            _otherRefundAmount,
+            _otherRefundRemark } = item
+          return {
+            id,
+            refundAttendClassIds: _refundAttendClassIds,
+            refundAmount: _refundPrice,
+            otherRefundAmount: _otherRefundAmount,
+            otherRefundRemark: _otherRefundRemark
+          }
+        })
+        const otherOrder = this.otherOrder.map(item => {
+          const { id, _number, _refundOtherPrice } = item
+          return {
+            id,
+            number: _number,
+            realRefundAmount: _refundOtherPrice
+          }
+        })
+        applyRefund({
+          Loading: true,
+          order,
+          otherOrder,
+          ...this.refundForm,
+          refundAmountCount: this.$children[0].totalOrderPrice,
+          otherRefundAmountCount: this.$children[0].totalOtherPrice
+        }).then(() => {
+          this.$message.success('退费成功')
+          this.$router.go(-1)
+        })
+      }).catch(() => { })
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.refund-box {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 114px;
+    width: calc(100% + 44px);
+    height: 22px;
+    background: linear-gradient(to bottom, #f1f1f1, #f3f5f7, #f1f1f1);
+  }
+  &-content {
+    padding-top: 66px;
+    .el-button--goback {
+      position: absolute;
+    }
+    > h2 {
+      margin: 0 0 22px 0;
+      text-align: center;
+    }
+    .hidden i {
+      display: none;
+    }
+    &-info {
+      display: flex;
+      justify-content: space-between;
+      &-left {
+        width: 600px;
+        input {
+          width: 200px !important;
+        }
+        .el-form-item:last-child input {
+          width: 494px !important;
+        }
+        .reason {
+          input {
+            width: 245px !important;
+          }
+        }
+      }
+      &-right {
+        width: 400px;
+        > div {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          h4 {
+            margin: 10px 0;
+          }
+          &:nth-child(3) {
+            margin-top: 15px;
+            border-top: 1px solid #000;
+          }
+          &.btn {
+            justify-content: center;
+            button {
+              flex: 1;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,24 @@
+<template>
+  <div class="other-payment-box">
+    <apply>
+      <template slot-scope="{row}">
+        <el-button
+          type="text"
+          @click="$router.push({path: `/foreground/otherpayment/otherPay/${row.id}`})"
+        >缴费</el-button>
+      </template>
+    </apply>
+  </div>
+</template>
+
+<script>
+import Apply from '../apply'
+export default {
+  components: {
+    Apply
+  }
+}
+</script>
+
+<style scoped>
+</style>

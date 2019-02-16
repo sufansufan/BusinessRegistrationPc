@@ -1,0 +1,330 @@
+<template>
+  <div class="class-query-box">
+    <div class="select-tools">
+      <div>
+        <div>
+          <el-select v-model="select.particularYearForIdentity" placeholder="年度">
+            <el-option
+              v-for="item in constant.particular_year"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.seasonForIdentity" placeholder="季节">
+            <el-option
+              v-for="item in constant.season"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.periodsForIdentity" placeholder="期别">
+            <el-option
+              v-for="item in constant.periods"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.gradeForIdentity" placeholder="年级">
+            <el-option
+              v-for="item in constant.grade"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.subjectForIdentity" placeholder="科目">
+            <el-option
+              v-for="item in constant.subject"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.projectTypeForIdentity" placeholder="类别">
+            <el-option
+              v-for="item in constant.project_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.classTypeForIdentity" placeholder="班型">
+            <el-option
+              v-for="item in constant.class_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.value" placeholder="学部">
+            <el-option
+              v-for="item in constant.department_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-input
+            v-model="select.teacherName"
+            placeholder="老师姓名"
+            @keyup.enter.native="fetchData('search')"
+          />
+        </div>
+        <div>
+          <el-input
+            v-model="select.className"
+            placeholder="班级姓名"
+            @keyup.enter.native="fetchData('search')"
+          />
+        </div>
+        <div>
+          <el-cascader
+            :options="constant.campus"
+            v-model="select.parentId"
+            :props="{label: 'name', value:'id'}"
+            placeholder="校区"
+            change-on-select
+          />
+        </div>
+        <div class="checkbox-list">
+          <el-checkbox-group v-model="select.classWeekDay" class="week-list">
+            <el-checkbox
+              v-for="week in constant.week_day_type"
+              :key="week.id"
+              :label="week.value"
+            >{{ week.label }}</el-checkbox>
+          </el-checkbox-group>
+          <el-checkbox-group v-model="select.timeslotType" class="time-list">
+            <el-checkbox
+              v-for="time in constant.timeslot_type"
+              :key="time.id"
+              :label="time.value"
+            >{{ time.label }}</el-checkbox>
+          </el-checkbox-group>
+          <div class="class-list">
+            <el-checkbox v-model="select.whetherShowHadEndClass" label="已结课班级"/>
+            <el-checkbox v-model="select.whetherOnlyShowNotFullClass" label="仅未满班级"/>
+          </div>
+        </div>
+        <div class="inline">
+          <el-button type="primary" @click="fetchData('search')">搜索</el-button>
+          <el-button @click="resetSearch">重置搜索条件</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table v-loading="loading" :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="adminOrganName" label="校区"/>
+      <el-table-column prop="className" label="班级名称" width="250"/>
+      <el-table-column prop="periodsName" label="期别"/>
+      <el-table-column prop="teacherName" label="老师"/>
+      <el-table-column prop="address" label="重复周期" width="80">
+        <template slot-scope="scope">
+          <span>{{ scope.row.classWeekDayName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="classroomName" label="教室"/>
+      <el-table-column prop="totalPrice" label="价格">
+        <template slot-scope="scope">
+          <span class="price-font">￥{{ scope.row.totalPrice }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="leftTimes" label="课次剩余"/>
+      <el-table-column label="招生情况">
+        <template slot-scope="scope">
+          <span class="price-font">{{ scope.row.signupNum }} / {{ scope.row.maxStudentsNum }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="timeslotName" label="时段" width="120"/>
+      <el-table-column prop="startClassDate" label="上课日期" width="90"/>
+      <el-table-column prop="signupNum" label="报名人数"/>
+      <el-table-column prop="payNum" label="缴费人数"/>
+      <el-table-column prop="leftNum" label="剩余名额"/>
+      <el-table-column prop="waitNum" label="候补人数"/>
+      <el-table-column label="操作" fixed="right" width="50">
+        <template slot-scope="scope">
+          <slot :row="scope.row">
+            <el-button
+              :disabled="whetherInSelectedClass(scope.row.id)"
+              type="text"
+              @click="e => apply(e, scope.row)"
+            >报名</el-button>
+          </slot>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <template v-if="isApply">
+      <course-cart :list="courseCart"/>
+      <car-ball ref="carBall"/>
+    </template>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import tables from '@/mixin/tables'
+import CourseCart from './CourseCart'
+import CarBall from '@/views/components/CarBall'
+import { getClassList } from '@/api/backstage/courseManagement'
+export default {
+  name: 'ClassQuery',
+  inject: ['sid'],
+  components: {
+    CourseCart,
+    CarBall
+  },
+  mixins: [tables],
+  props: {
+    isApply: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      select: {
+        particularYearForIdentity: '',
+        adminOrganIds: [],
+        seasonForIdentity: '',
+        teacherName: '',
+        periodsForIdentity: '',
+        className: '',
+        gradeForIdentity: '',
+        subjectForIdentity: '',
+        timeslotType: [],
+        projectTypeForIdentity: '',
+        classTypeForIdentity: '',
+        classWeekDay: [],
+        whetherShowHadEndClass: false,
+        whetherOnlyShowNotFullClass: false
+      },
+      dataList: [],
+      selectedClass: []
+    }
+  },
+  computed: {
+    ...mapGetters(['constant', 'courseCart'])
+  },
+  created() {
+    this.$store.dispatch('getConstant', [
+      'particular_year',
+      'season',
+      'periods',
+      'grade',
+      'subject',
+      'project_type',
+      'class_type',
+      'timeslot_type',
+      'department_type',
+      'campus',
+      'week_day_type'
+    ])
+    this.fetchData()
+    this.$store.dispatch('getCourseCart', { studentId: this.sid })
+  },
+  methods: {
+    apply(e, row) {
+      this.$refs.carBall.drop(e.target)
+      this.$store.dispatch('addCourseCart', { studentId: this.sid, classId: row.id })
+    },
+    whetherInSelectedClass(id) {
+      return this.courseCart.some(item => item.classId === id)
+    },
+    fetchData(type) {
+      if (type === 'search') this.page = 1
+      const { adminOrganIds, timeslotType, classWeekDay } = JSON.parse(JSON.stringify(this.select))
+      const params = {
+        page: this.page,
+        limit: this.limit,
+        ...this.select,
+        adminOrganIds: adminOrganIds.length ? adminOrganIds.pop() : '',
+        timeslotType: timeslotType.length ? timeslotType.join(',') : '',
+        classWeekDay: classWeekDay.length ? classWeekDay.join(',') : ''
+      }
+      this.BFD(getClassList(params).then(res => {
+        const { count, list } = res.data
+        this.count = count
+        this.dataList = list
+      }))
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.class-query-box {
+  padding-bottom: 90px;
+  .select-tools {
+    > div > div {
+      margin: 0 10px 10px 0 !important;
+      &.checkbox-list {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      &.inline {
+        padding-left: 5px;
+        align-items: center;
+      }
+      .el-select,
+      .el-input {
+        width: 184px;
+        input {
+          &:not(:focus) {
+            border: 1px solid #ebebeb;
+            background: #f8f8f8 !important;
+          }
+        }
+      }
+      .time-list,
+      .class-list {
+        padding-left: 15px;
+        border-right: 1px solid #ebebeb;
+        > label:last-child {
+          margin: 0;
+        }
+      }
+      .week-list {
+        width: 315px;
+        border-right: 1px solid #ebebeb;
+        > label:nth-child(5) {
+          margin: 0;
+        }
+      }
+      .time-list {
+        width: 165px;
+      }
+      .class-list {
+        width: 125px;
+      }
+    }
+  }
+}
+</style>

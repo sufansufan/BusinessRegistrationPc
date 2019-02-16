@@ -1,0 +1,110 @@
+<template>
+  <div class="achievement-box">
+    <div class="achievement-box-list">
+      <template v-if="achievement.length">
+        <el-tag
+          v-for="tag in achievement"
+          :key="tag.name"
+          type="subject"
+          closable
+          @close="handleCloseTag(tag)"
+        >{{ tag.label }} - {{ tag.score }}</el-tag>
+      </template>
+      <span v-else class="empty">暂无成绩</span>
+    </div>
+    <div class="inline">
+      <el-select
+        v-model="selectedSubject"
+        multiple
+        filterable
+        allow-create
+        default-first-option
+        placeholder="请选择科目"
+      >
+        <el-option
+          v-for="item in subject"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
+      <el-input v-model="score" style="width: 100px;" placeholder="输入成绩"/>
+      <div>
+        <el-button type="primary" @click="addAchievement">添加</el-button>
+      </div>
+      <div v-if="isEdit">
+        <el-button type="primary">保存</el-button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      subject: [
+        {
+          value: 'a1',
+          label: '语文'
+        },
+        {
+          value: 'a2',
+          label: '数学'
+        },
+        {
+          value: 'a3',
+          label: '英语'
+        }
+      ],
+      score: '',
+      selectedSubject: [],
+      achievement: []
+    }
+  },
+  methods: {
+    addAchievement() {
+      const selectedList = this.subject.filter(item =>
+        this.selectedSubject.some(child => child === item.value)
+      ).map(item => {
+        this.$set(item, 'score', this.score)
+        return item
+      })
+      if (this.achievement.length) {
+        selectedList.forEach((item, index) => {
+          if (this.achievement.some(child => child.value === item.value)) {
+            this.achievement[index].score = this.score
+          } else {
+            this.achievement.push(item)
+          }
+        })
+      } else {
+        this.achievement.push(...selectedList)
+      }
+    },
+    handleCloseTag(tag) {
+      this.achievement.splice(this.achievement.findIndex(item => item.value === tag.value), 1)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.achievement-box {
+  overflow: hidden;
+  &-list {
+    height: 50px;
+    .empty {
+      line-height: 50px;
+      font-size: 14px;
+      color: #a7a5a5;
+    }
+  }
+}
+</style>

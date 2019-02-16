@@ -1,0 +1,139 @@
+<template>
+  <div class="pay-box">
+    <student :sid="sid"/>
+    <div class="pay-box-content">
+      <el-button type="goback" @click="$router.go(-1)">返回</el-button>
+      <h2>退费</h2>
+      <comm-table :data="order" :columns="orderColumns"/>
+      <h3>收费项</h3>
+      <comm-table :data="otherOrder" :columns="otherOrderColumns"/>
+    </div>
+  </div>
+</template>
+
+<script>
+import Student from './student'
+import { getApplyRefund } from '@/api/foreground/apply'
+export default {
+  inject: ['sid'],
+  components: {
+    Student
+  },
+  data() {
+    return {
+      isEdit: false,
+      order: [],
+      orderColumns: [
+        { label: '班级名称', prop: 'className' },
+        { label: '购课/总课节', prop: ['payAttendCount', 'totalTimes'], type: 'num' },
+        { label: '应付金额', prop: 'price', pre: '￥', type: 'num' },
+        {
+          label: '折扣',
+          render: (h, row) => {
+            return h('div', [
+              h('span', { class: 'price-font' }, row.discount),
+              h('div', row.discountReason || '无')
+            ])
+          }
+        },
+        {
+          label: '立减',
+          render: (h, row) => {
+            return h('div', [
+              h('span', { class: 'price-font' }, '￥' + row.subtractAmount),
+              h('div', row.subtractReason || '无')
+            ])
+          }
+        },
+        { label: '实付金额', prop: 'realPayment', pre: '￥', type: 'num' },
+        { label: '课节单价', prop: 'singlePrice', pre: '￥', type: 'num' },
+        { label: '退费课次数' },
+        { label: '课节退费' },
+        { label: '额外退费' },
+        { label: '退费总额' }
+      ],
+      otherOrder: [],
+      otherOrderColumns: [
+        { label: '收费项目', prop: 'otherName' },
+        { label: '数量', prop: 'number', type: 'num' },
+        { label: '单价', prop: 'singlePrice', pre: '￥', type: 'num' },
+        { label: '应付金额', prop: 'price', pre: '￥', type: 'num' },
+        { label: '实付金额', prop: 'realPayment', pre: '￥', type: 'num' },
+        {
+          label: '退费数量',
+          render: (h, row) => {
+            this.$set(row, '_number', row.number)
+            return h('el-input-number', {
+              model: {
+                value: row.number,
+                callback: val => {
+                  this.$set(row, 'number', val)
+                }
+              },
+              attrs: {
+                min: 1,
+                max: row._number,
+                'controls-position': 'right'
+              }
+            })
+          }
+        },
+        {
+          label: '退费总额',
+          render: (h, row) => {
+            return h('count-num', {
+              props: {
+                num: row._number * row.singlePrice
+              },
+              attrs: {
+                prefix: '￥'
+              }
+            })
+          }
+        }
+      ]
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      getApplyRefund({ Loading: true, ids: this.$route.query.ids }).then(res => {
+        this.order = res.data.list.filter(item => {
+          if (item.otherName) {
+            this.otherOrder.push(item)
+            return false
+          }
+          return true
+        })
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.pay-box {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 114px;
+    width: calc(100% + 44px);
+    height: 22px;
+    background: linear-gradient(to bottom, #f1f1f1, #f3f5f7, #f1f1f1);
+  }
+  &-content {
+    padding-top: 66px;
+    .el-button--goback {
+      position: absolute;
+    }
+    > h2 {
+      margin: 0 0 22px 0;
+      text-align: center;
+    }
+  }
+}
+</style>

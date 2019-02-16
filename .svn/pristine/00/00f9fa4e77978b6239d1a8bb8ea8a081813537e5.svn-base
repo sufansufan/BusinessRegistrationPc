@@ -1,0 +1,50 @@
+import { addCourseCart, getCourseCartList } from '@/api/foreground/apply'
+const apply = {
+  state: {
+    courseCar: []
+  },
+  mutations: {
+    SET_COURSE_CAR(state, list) {
+      state.courseCar = list
+    }
+  },
+  actions: {
+    addCourseCart(context, params) {
+      return new Promise((resolve, reject) => {
+        addCourseCart(params)
+          .then(() => {
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+    getCourseCart({ commit }, params) {
+      return new Promise((resolve, reject) => {
+        getCourseCartList(params)
+          .then(response => {
+            commit('SET_COURSE_CAR', response.data.list)
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+    delCourseCart({ commit }, { id, list }) {
+      return new Promise((resolve, reject) => {
+        getCourseCartList({ id })
+          .then(() => {
+            commit('SET_COURSE_CAR', list)
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    }
+  }
+}
+
+export default apply

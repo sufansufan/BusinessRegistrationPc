@@ -1,0 +1,221 @@
+<template>
+  <div class="tabs-signin-box">
+    <div v-if="!isEdit">
+      <h5>课节安排</h5>
+      <comm-table
+        v-loading="loading"
+        ref="table"
+        :data="attendClassList"
+        :columns="columns"
+        :single-selected="true"
+        @selected="selectedRow"
+      />
+    </div>
+    <div class="signin-situation">
+      <h5>签到情况</h5>
+      <div v-for="item in signinList" :key="item.id">
+        <span>{{ item.studentName }}</span>
+        <el-radio-group
+          v-model="item.rollCallStatus"
+          :disabled="!isEdit"
+          size="big"
+          @change="repairSigninSituation(item)"
+        >
+          <el-radio-button label="2">签到</el-radio-button>
+          <el-radio-button label="3">迟到</el-radio-button>
+          <el-radio-button label="4">请假</el-radio-button>
+          <el-radio-button label="5">旷课</el-radio-button>
+        </el-radio-group>
+      </div>
+      <div v-show="!signinList.length" class="is-empty">暂无信息</div>
+    </div>
+    <div class="repair-signin-situation">
+      <h5>补签情况</h5>
+      <div v-for="item in signinList" :key="item.id">
+        <el-checkbox-group
+          v-model="item._repairSignin"
+          :disabled="!isEdit"
+          size="big"
+          @change="repairSigninSituation(item)"
+        >
+          <el-checkbox-button >补签</el-checkbox-button>
+        </el-checkbox-group>
+        <el-date-picker v-model="item.updateDate" :disabled="!isEdit" size="big" type="date" placeholder="选择日期"/>
+        <el-input v-model="item.remarks" :disabled="!isEdit" size="big" placeholder="请输入内容"/>
+      </div>
+      <div v-show="!signinList.length" class="is-empty">暂无信息</div>
+    </div>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import { getAttendClassList, getStuAttendClassList } from '@/api/foreground/queryClass'
+import { parseTime } from '@/utils'
+export default {
+  mixins: [tables],
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      attendClassList: [],
+      columns: [
+        { label: ' ', index: true },
+        { prop: 'workdate', width: 88 },
+        { prop: ['startTime', 'endTime'], separator: '-', width: 100 },
+        { prop: 'teacherName' },
+        { prop: 'classroomName' },
+        { prop: ['realSignUpNum', 'shouldSignUpNum'], type: 'num' }
+      ],
+      signinList: []
+    }
+  },
+  async created() {
+    if (!this.isEdit) {
+      await this.fetchData()
+      if (this.attendClassList.length) {
+        this.$refs.table.setCurrentRow(this.attendClassList[0])
+      }
+    } else {
+      const { id: classId, attendId: id } = this.$route.params
+      this.selectedRow({
+        id,
+        classId
+      })
+    }
+  },
+  methods: {
+    fetchData() {
+      return this.BFD(getAttendClassList({
+        classId: this.$route.params.id
+      }).then((res) => {
+        this.attendClassList = res.data.list.map(item => {
+          item.workdate = parseTime(item.workdate, 'y-m-d')
+          return item
+        })
+      }))
+    },
+    selectedRow({ id, classId }) {
+      getStuAttendClassList({
+        Loading: true,
+        attendClassId: id,
+        classId,
+        whetherAttend: true
+      }).then(res => {
+        this.signinList = res.data.list.map(item => {
+          const { rollCallStatus } = item
+          if (rollCallStatus === '6' || rollCallStatus === '7') {
+            item._repairSignin = true
+          } else {
+            item._repairSignin = false
+          }
+          return item
+        })
+      })
+    },
+    repairSigninSituation(row) {
+      const { rollCallStatus, _repairSignin } = row
+      if (rollCallStatus !== '4' && rollCallStatus !== '5' && _repairSignin) {
+        this.$message.error('只有请假、旷课状态可以补签')
+        this.$set(row, '_repairSignin', false)
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.tabs-signin-box {
+  .el-table {
+    padding-bottom: 1px;
+    .el-table__header {
+      display: none;
+    }
+  }
+  .current-row {
+    td {
+      &:first-child {
+        border-radius: 5px 0 0 5px;
+      }
+      border-top: 1px solid !important;
+      border-bottom: 1px solid !important;
+      &:last-child {
+        border-radius: 0 5px 5px 0;
+      }
+      .cell {
+        height: 39px;
+        line-height: 39px !important;
+      }
+    }
+  }
+  .cell {
+    height: 41px;
+    line-height: 41px !important;
+  }
+  .repair-signin-situation > div {
+    > div:first-child {
+      .el-checkbox-button__inner {
+        border-radius: 5px !important;
+      }
+    }
+  }
+  .el-radio-group {
+    > label {
+      &:first-child span {
+        border-radius: 18px 0 0 18px !important;
+      }
+      &:last-child span {
+        border-radius: 0 18px 18px 0 !important;
+      }
+    }
+  }
+}
+</style>
+<style lang="scss" scoped>
+.tabs-signin-box {
+  display: flex;
+  justify-content: space-between;
+  > div {
+    flex: 1;
+    margin: 0 14px;
+    border: 1px solid #f8f8f8;
+    &:first-child {
+      margin-left: 0;
+    }
+    &:last-child {
+      margin-right: 0;
+    }
+    > h5 {
+      height: 57px;
+      line-height: 57px;
+      margin: 0;
+      background: #f8f8f8;
+      text-align: center;
+    }
+    &.signin-situation,
+    &.repair-signin-situation {
+      > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 57px;
+        line-height: 57px;
+        padding: 0 10px;
+        background: #fff;
+        &:nth-child(odd) {
+          background: #fafafa;
+        }
+      }
+    }
+    &.repair-signin-situation > div {
+      > div:not(:first-child) {
+        margin-left: 10px;
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,667 @@
+<template>
+  <div class="pay-content-box">
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="className" label="班级名称"/>
+      <el-table-column prop="date" label="剩余/总课节" width="95">
+        <template slot-scope="scope">
+          <div>12/15</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="选取课节" width="78">
+        <template slot-scope="scope">
+          <el-popover placement="bottom" width="616" trigger="click">
+            <div class="course-box">
+              <h4>
+                <span>文化路</span>
+                <span>{{ scope.row.className }}</span>
+                <span>1期</span>
+              </h4>
+              <div class="course-box-list">
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">1</h1>
+                  <span class="el-button--success">已付</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">2</h1>
+                  <span class="el-button--danger">未付</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">3</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">4</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">5</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">6</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">7</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">8</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">9</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+                <div>
+                  <span>06-01</span>
+                  <h1 class="act-color">10</h1>
+                  <span class="no-buy">未买</span>
+                </div>
+              </div>
+            </div>
+            <el-button slot="reference" type="text">12</el-button>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column label="应付金额" widt="200">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <count-num :num="960" prefix="￥"/>
+          </template>
+          <template v-else>
+            <div class="price-font">￥960.00</div>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column label="折扣" width="180">
+        <template slot-scope="scope">
+          <div class="two-line">
+            <template v-if="isEdit">
+              <el-select v-model="select.value" placeholder="请选择">
+                <el-option
+                  v-for="item in []"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+              <el-input placeholder="备注"/>
+            </template>
+            <template v-else>
+              <div class="price-font">8</div>
+              <div>新三秋季八折</div>
+            </template>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="立减" width="180">
+        <template slot-scope="scope">
+          <div class="two-line">
+            <template v-if="isEdit">
+              <el-input-number v-model="select.num8" :min="1" :max="10" controls-position="right"/>
+              <el-input placeholder="备注"/>
+            </template>
+            <template v-else>
+              <div class="price-font">￥200.00</div>
+              <div>新三秋季八折</div>
+            </template>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="优惠卷" width="150">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <el-select v-model="select.value" placeholder="请选择">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </template>
+          <template v-else>
+            <div class="price-font">￥-200.00</div>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column label="实付金额" widt="200">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <count-num :num="960" prefix="￥"/>
+          </template>
+          <template v-else>
+            <div class="price-font">￥960.00</div>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isEdit" label="操作" width="100">
+        <template slot-scope="scope">
+          <el-button type="text">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <h3>收费项</h3>
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="date" label="收费内容">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <el-input v-model="select.input5" placeholder="请输入内容" class="input-with-select">
+              <el-select slot="prepend" v-model="select.select" placeholder="请选择">
+                <el-option label="餐厅名" value="1"/>
+                <el-option label="订单号" value="2"/>
+                <el-option label="用户电话" value="3"/>
+              </el-select>
+            </el-input>
+          </template>
+          <template v-else>（郑州）2018春季二年级数学思维素养教材冲刺版</template>
+        </template>
+      </el-table-column>
+      <el-table-column prop="date" label="数量" width="200">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <el-input-number v-model="select.num8" :min="1" :max="999" controls-position="right"/>
+          </template>
+          <template v-else>
+            <div class="price-font">2</div>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column prop="date" label="产品单价" width="200">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <el-input/>
+          </template>
+          <template v-else>
+            <div class="price-font">￥50.00</div>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column prop="date" label="应付金额" width="200">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <count-num :num="960" prefix="￥"/>
+          </template>
+          <template v-else>
+            <div class="price-font">￥50.00</div>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column prop="date" label="实付金额" width="200">
+        <template slot-scope="scope">
+          <template v-if="isEdit">
+            <el-input/>
+          </template>
+          <template v-else>
+            <div class="price-font">￥50.00</div>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isEdit" prop="date" label="操作" width="100">
+        <template slot-scope="scope">
+          <el-button type="text">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div class="pay-content-box-bottom">
+      <div>
+        <h3>推荐码</h3>
+        <template v-if="isEdit">
+          <el-input style="width: 300px;"/>
+        </template>
+        <template v-else>
+          <div class="price-font">WERWRE2452</div>
+        </template>
+        <h3>优惠卷列表</h3>
+        <el-scrollbar style="width: 580px;">
+          <div class="coupon-list">
+            <div class="act-color act-border">
+              <h1>
+                <span>￥</span>
+                <span class="price-font">300</span>
+              </h1>
+              <h5>2018暑期二年级数学</h5>
+              <div class="bottom">
+                <span>全国</span>
+                <span>可叠加</span>
+              </div>
+              <i class="act-bg el-icon-check"/>
+            </div>
+            <div class="act-color">
+              <h1>
+                <span>￥</span>
+                <span class="price-font">300</span>
+              </h1>
+              <h5>2018暑期二年级数学</h5>
+              <div class="bottom">
+                <span>全国</span>
+                <span>可叠加</span>
+              </div>
+            </div>
+            <div>
+              <h1>
+                <span>￥</span>
+                <span class="price-font">300</span>
+              </h1>
+              <h5>2018暑期二年级数学</h5>
+              <div class="bottom">
+                <span>全国</span>
+                <span>可叠加</span>
+              </div>
+            </div>
+          </div>
+        </el-scrollbar>
+        <template v-if="!isEdit">
+          <h3>分期支付</h3>
+          <div class="by-stages">
+            <div
+              v-for="(item, index) in byStages"
+              :key="index"
+              :class="{'act-bg': item.selected}"
+              class="act-color"
+              @click="byStagesSelect(index)"
+            >
+              <i class="act-border"/>
+              分期{{ index + 1 }}：{{ item.title }}
+              <span
+                class="price-font"
+              >￥{{ item.price }}</span>
+              <i class="act-border"/>
+            </div>
+          </div>
+          <el-tabs v-model="paymentMode" class="payment-mode">
+            <el-tab-pane label="普通收款" name="ordinary">
+              <el-form :inline="true" :model="select" label-position="top">
+                <el-form-item label="收费方式">
+                  <el-select v-model="select.region" placeholder="请选择">
+                    <el-option label="微信" value="shanghai"/>
+                    <el-option label="刷卡" value="beijing"/>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="POS流水号">
+                  <el-input v-model="select.user" placeholder="请输入"/>
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="智能POS机" name="intelligent">
+              <el-form :inline="true" :model="select" label-position="top">
+                <el-form-item label="选择POS机">
+                  <el-select v-model="select.region" placeholder="请选择">
+                    <el-option label="微信" value="shanghai"/>
+                    <el-option label="刷卡" value="beijing"/>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="收费方式">
+                  <el-select v-model="select.region" placeholder="请选择">
+                    <el-option label="微信" value="shanghai"/>
+                    <el-option label="刷卡" value="beijing"/>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="POS流水号">
+                  <el-input v-model="select.user" placeholder="请输入"/>
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
+          </el-tabs>
+        </template>
+      </div>
+      <div class="pay-total-box">
+        <h3>购课项合计</h3>
+        <p>
+          <span>应付金额</span>
+          <count-num :num="2880" prefix="￥"/>
+        </p>
+        <p>
+          <span>优惠金额</span>
+          <count-num :num="300" prefix="￥"/>
+        </p>
+        <h3>收费项合计</h3>
+        <p>
+          <span>实付金额</span>
+          <count-num :num="1440" prefix="￥"/>
+        </p>
+        <div class="total">
+          <h2>共计</h2>
+          <count-num :num="129990" :size="24" prefix="￥"/>
+        </div>
+        <div v-if="!isEdit" class="total">
+          <h2>本期支付</h2>
+          <count-num :num="1280" :size="24" prefix="￥"/>
+        </div>
+        <div class="btn">
+          <template v-if="isEdit">
+            <el-button size="medium" @click="$router.go(-1)">稍后在缴</el-button>
+            <el-button type="primary" size="medium" @click="$emit('update:isEdit', false)">立即支付</el-button>
+          </template>
+          <template v-else>
+            <el-button size="medium" @click="$emit('update:isEdit', true)">上一步</el-button>
+            <el-button type="primary" size="medium">去支付</el-button>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import CountNum from '@/components/CountNum'
+export default {
+  components: {
+    CountNum
+  },
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      dataList: [
+        { className: '2018年暑假六年级数学思维素养A2班' },
+        { className: '2018年暑假六年级数学思维素养A2班' }
+      ],
+      select: {},
+      paymentMode: 'ordinary',
+      byStages: [
+        {
+          title: '1-3月课次',
+          price: 1100,
+          selected: true
+        },
+        {
+          title: '4-7月课次',
+          price: 990
+        },
+        {
+          title: '8-11月课次',
+          price: 870
+        },
+        {
+          title: '12-2月课次',
+          price: 650
+        },
+        {
+          title: '3-6月课次',
+          price: 500
+        }
+      ]
+    }
+  },
+  methods: {
+    byStagesSelect(index) {
+      this.byStages.forEach((item, i) => {
+        item.selected = false
+        if (i <= index) {
+          item.selected = true
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.coupon-list {
+  i.act-bg {
+    width: 0;
+    height: 0;
+    border-top: 25px solid #fff;
+    border-right: 25px solid transparent;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    color: #fff !important;
+    &::before {
+      position: absolute;
+      top: -16px;
+      right: -25px;
+    }
+  }
+}
+.pay-content-box {
+  .payment-mode {
+    .el-tabs__header {
+      margin-bottom: 0px;
+    }
+    .el-form-item {
+      margin-bottom: 10px;
+    }
+    .el-tabs__content {
+      padding-left: 10px;
+    }
+    label {
+      padding-bottom: 0 !important;
+    }
+  }
+}
+</style>
+<style lang="scss" scoped>
+.course-box {
+  h4 {
+    margin: 0 0 10px 0;
+    span {
+      padding-right: 10px;
+    }
+  }
+  &-list {
+    display: flex;
+    flex-wrap: wrap;
+    width: calc(100% + 10px);
+    > div {
+      width: 65px;
+      height: 65px;
+      border-radius: 6px;
+      position: relative;
+      border: 1px solid #f3f3f3;
+      box-shadow: 0 0 10px #eee;
+      overflow: hidden;
+      margin-right: 10px;
+      &:nth-child(8n) {
+        &:not(:last-child) {
+          margin: 0 0 10px;
+        }
+      }
+      h1 {
+        margin: 10px 0 0 0;
+        text-align: center;
+      }
+      span {
+        font-size: 12px;
+        position: absolute;
+        &:first-child {
+          left: 3px;
+          top: 0;
+          color: #aeadad;
+        }
+        &:last-child {
+          bottom: 0;
+          width: 100%;
+          text-align: center;
+          &.no-buy {
+            background: #eee;
+            color: #a5a5a5;
+          }
+        }
+      }
+    }
+  }
+}
+.pay-content-box {
+  &-bottom {
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    > div:first-child {
+      align-self: flex-start;
+    }
+  }
+  > h3 {
+    padding-top: 20px;
+  }
+  .price-font {
+    font-size: 18px;
+  }
+  .two-line {
+    display: flex;
+    flex-wrap: wrap;
+    > div {
+      &:first-child {
+        width: 100px;
+        &.price-font {
+          &,
+          & + div {
+            width: 100%;
+          }
+        }
+        margin-bottom: 9px;
+      }
+    }
+  }
+  .coupon-list {
+    display: flex;
+    flex-wrap: wrap;
+    width: 580px;
+    max-height: 230px;
+    padding: 10px 0 0 10px;
+    > div {
+      width: 180px;
+      height: 100px;
+      border: 1px solid #f3f3f3;
+      box-shadow: 0 0 10px #eee;
+      overflow: hidden;
+      border-radius: 6px;
+      position: relative;
+      margin: 0 10px 10px 0;
+      color: #bbb;
+      background: #fff;
+      &:not(.act-color) {
+        background: #e5e5e5;
+      }
+      h1 {
+        margin: 10px 0 5px 0;
+        text-align: center;
+        span {
+          &:first-child {
+            font-size: 20px;
+          }
+          &:last-child {
+            margin-left: -10px;
+            font-size: 1em;
+          }
+        }
+      }
+      h5 {
+        margin: 0;
+        padding: 0 7px;
+      }
+      .bottom {
+        position: absolute;
+        bottom: 3px;
+        left: 5px;
+        font-size: 12px;
+        span {
+          padding-right: 10px;
+        }
+      }
+    }
+  }
+  .by-stages {
+    display: flex;
+    flex-wrap: wrap;
+    padding-bottom: 5px;
+    > div {
+      height: 32px;
+      line-height: 32px;
+      padding: 0 10px;
+      background: #ececec;
+      margin-right: 8px;
+      position: relative;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.1s;
+      &:first-child:last-child {
+        border-radius: 3px;
+      }
+      &.act-bg {
+        color: #fff !important;
+        &:not(:first-child) {
+          padding-left: 15px;
+          > i {
+            &:first-child {
+              border-left-color: #fbfcfc !important;
+            }
+          }
+        }
+      }
+      &:first-child {
+        border-radius: 3px 0 0 3px;
+        > i:first-child {
+          display: none;
+        }
+      }
+      &:last-child {
+        border-radius: 0 3px 3px 0;
+        > i:last-child {
+          display: none;
+        }
+      }
+      &:not(.act-bg) {
+        padding-left: 15px;
+        > i {
+          border-left-color: #fbfcfc !important;
+          &:last-child {
+            border-left-color: #ececec !important;
+          }
+        }
+      }
+      > i {
+        position: absolute;
+        content: "";
+        top: 0;
+        border-top: 16px solid transparent !important;
+        border-bottom: 16px solid transparent !important;
+        border-left: 8px solid;
+        &:first-child {
+          left: 0;
+        }
+        &:last-child {
+          right: -8px;
+        }
+      }
+    }
+  }
+  .pay-total-box {
+    width: 400px;
+    > p {
+      padding-left: 20px;
+    }
+    > p,
+    .total {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .total {
+      border-top: 1px solid #ddd;
+    }
+    .btn {
+      text-align: center;
+      > button {
+        width: 40%;
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,243 @@
+<template>
+  <div class="class-query-box">
+    <div class="select-tools">
+      <div>
+        <div>
+          <el-select v-model="options.value" placeholder="年度">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="季节">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="期别">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="年级">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="科目">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="类别">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="班型">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="学部">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-input placeholder="老师姓名"/>
+        </div>
+        <div>
+          <el-input placeholder="班级姓名"/>
+        </div>
+        <div>
+          <el-select v-model="options.value" placeholder="校区">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div class="checkbox-list">
+          <el-checkbox-group v-model="options.value" class="week-list">
+            <el-checkbox label="周一"/>
+            <el-checkbox label="周二"/>
+            <el-checkbox label="周三"/>
+            <el-checkbox label="周四"/>
+            <el-checkbox class="no-ml" label="周五"/>
+            <el-checkbox label="周六"/>
+            <el-checkbox label="周日"/>
+          </el-checkbox-group>
+          <el-checkbox-group v-model="options.value" class="time-list">
+            <el-checkbox label="上午"/>
+            <el-checkbox label="下午"/>
+            <el-checkbox class="no-ml" label="晚上"/>
+          </el-checkbox-group>
+          <el-checkbox-group v-model="options.value" class="class-list">
+            <el-checkbox label="仅续报班级"/>
+            <el-checkbox label="已结课班级"/>
+            <el-checkbox class="no-ml" label="仅未满班级"/>
+          </el-checkbox-group>
+        </div>
+        <div class="inline">
+          <el-button type="primary">搜索</el-button>
+          <el-button>重置搜索条件</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="date" label="校区"/>
+      <el-table-column prop="name" label="班级名称" width="150"/>
+      <el-table-column prop="address" label="期别"/>
+      <el-table-column prop="address" label="老师"/>
+      <el-table-column prop="address" label="重复周期"/>
+      <el-table-column prop="address" label="教室"/>
+      <el-table-column prop="address" label="价格"/>
+      <el-table-column prop="address" label="课次剩余"/>
+      <el-table-column prop="address" label="招生情况"/>
+      <el-table-column prop="address" label="时段"/>
+      <el-table-column prop="address" label="上课日期"/>
+      <el-table-column prop="address" label="报名人数"/>
+      <el-table-column prop="address" label="缴费人数"/>
+      <el-table-column prop="address" label="剩余名额"/>
+      <el-table-column prop="address" label="候补人数"/>
+      <el-table-column label="操作" fixed="right" width="50">
+        <template slot-scope="scope">
+          <slot :row="scope.row">
+            <el-button type="text" @click="e => apply(e, scope.row)">报名</el-button>
+          </slot>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <template v-if="isApply">
+      <class-car/>
+      <car-ball ref="carBall"/>
+    </template>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import ClassCar from './ClassCar'
+import CarBall from '@/views/components/CarBall'
+export default {
+  name: 'ClassQuery',
+  components: {
+    ClassCar,
+    CarBall
+  },
+  mixins: [tables],
+  props: {
+    isApply: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      options: {},
+      dataList: [1, 2, 3]
+    }
+  },
+  methods: {
+    apply(e, row) {
+      this.$refs.carBall.drop(e.target)
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.class-query-box {
+  .select-tools {
+    > div > div {
+      margin: 0 10px 10px 0 !important;
+      &.checkbox-list {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      &.inline {
+        padding-left: 5px;
+        align-items: center;
+      }
+      .el-select,
+      .el-input {
+        width: 184px;
+        input {
+          &:not(:focus) {
+            border: 1px solid #ebebeb;
+            background: #f8f8f8 !important;
+          }
+        }
+      }
+      .no-ml {
+        margin: 0;
+      }
+      .week-list {
+        width: 315px;
+        border-right: 1px solid #ebebeb;
+      }
+      .time-list {
+        width: 165px;
+        padding-left: 15px;
+        border-right: 1px solid #ebebeb;
+      }
+      .class-list {
+        padding-left: 15px;
+        width: 250px;
+        border-right: 1px solid #ebebeb;
+      }
+    }
+  }
+}
+</style>

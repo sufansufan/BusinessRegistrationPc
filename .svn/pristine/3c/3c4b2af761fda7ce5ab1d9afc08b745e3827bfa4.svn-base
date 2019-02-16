@@ -1,0 +1,78 @@
+<template>
+  <div class="apply-box shadow">
+    <router-view v-if="lastRoute"/>
+    <template v-else>
+      <div class="select-tools">
+        <div>
+          <div>
+            <el-input placeholder="请输入内容"/>
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-search">搜索</el-button>
+          </div>
+        </div>
+        <div class="btn">
+          <div>
+            <el-button
+              type="primary"
+              icon="el-icon-plus"
+              @click="$router.push({name: 'AddStudent'})"
+            >新增</el-button>
+          </div>
+        </div>
+      </div>
+      <el-table :data="dataList" stripe border style="width: 100%">
+        <el-table-column prop="date" label="姓名"/>
+        <el-table-column prop="name" label="学号" width="150"/>
+        <el-table-column prop="address" label="性别"/>
+        <el-table-column prop="address" label="年级"/>
+        <el-table-column prop="address" label="出生日期"/>
+        <el-table-column prop="address" label="就读学校"/>
+        <el-table-column prop="address" label="校区"/>
+        <el-table-column prop="address" label="联系电话" width="150"/>
+        <el-table-column prop="address" label="已结课/在读/已支付/总数" width="160"/>
+        <el-table-column prop="address" label="课程顾问"/>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button
+              type="primary"
+              @click="$router.push({path: '/foreground/apply/student/111'})"
+            >查看</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        v-show="count"
+        :page-sizes="pageSizes"
+        :page-size="limit"
+        :total="count"
+        :current-page="page"
+        :layout="pageLayout"
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+      />
+    </template>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+export default {
+  mixins: [tables],
+  data() {
+    return {
+      dataList: [1]
+    }
+  },
+  created() {
+  },
+  methods: {
+    fetchData() {
+      // TFD(api(params).then(xxx))
+    }
+  }
+}
+</script>
+
+<style scoped>
+</style>

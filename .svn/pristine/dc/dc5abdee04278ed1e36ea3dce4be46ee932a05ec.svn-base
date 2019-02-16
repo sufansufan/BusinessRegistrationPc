@@ -1,0 +1,138 @@
+<template>
+  <div class="course-label-box">
+    <div>
+      <div>
+        <h3 v-for="(item, index) in labelList" :key="item.label" class="bor-tit">
+          <span @click="clickLabel(index)">{{ item.label }}</span>
+          <transition name="el-fade-in">
+            <i :class="{'act-bg': item.status}"/>
+          </transition>
+        </h3>
+      </div>
+    </div>
+    <div>
+      <div>
+        <div class="list">
+          <el-input v-model="add" placeholder="请输入内容"/>
+          <i class="el-icon-plus act-color"/>
+        </div>
+      </div>
+      <div>
+        <div class="list">
+          <el-input v-model="input" placeholder="请输入内容"/>
+          <i class="el-icon-delete act-color"/>
+          <i class="el-icon-edit act-color"/>
+          <i class="el-icon-arrow-up act-color"/>
+          <i class="el-icon-arrow-down act-color"/>
+        </div>
+        <div class="list">
+          <el-input v-model="input" placeholder="请输入内容"/>
+          <i class="el-icon-delete act-color"/>
+          <i class="el-icon-edit act-color"/>
+          <i class="el-icon-arrow-up act-color"/>
+          <i class="el-icon-arrow-down act-color"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      add: '',
+      input: '',
+      labelList: [
+        {
+          label: '年份',
+          status: true
+        },
+        {
+          label: '季节',
+          status: false
+        },
+        {
+          label: '期别',
+          status: false
+        },
+        {
+          label: '年级',
+          status: false
+        },
+        {
+          label: '科目',
+          status: false
+        },
+        {
+          label: '类别',
+          status: false
+        },
+        {
+          label: '班型',
+          status: false
+        }
+      ]
+    }
+  },
+  methods: {
+    clickLabel(index) {
+      this.labelList.map(item => {
+        item.status = false
+      })
+      this.labelList[index].status = true
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.course-label-box{
+  display: flex;
+  & > div:first-child{
+    width: 5%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  & > div:last-child{
+    margin-left: 20px;
+    & > div {
+      .el-input{
+        width: 250px;
+      }
+    }
+    & > div:first-child{
+      display: flex;
+      .el-icon-plus{
+        margin-left: 20px;
+        line-height: 32px;
+        cursor: pointer;
+      }
+    }
+  }
+  .bor-tit{
+    width: 52px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .act-bg{
+    width: 52px;
+    height: 12px
+  }
+  .list{
+    margin: 10px 0px;
+    display: flex;
+    & > i {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      background: #f2f2f2;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      margin-left: 20px;
+    }
+  }
+}
+</style>

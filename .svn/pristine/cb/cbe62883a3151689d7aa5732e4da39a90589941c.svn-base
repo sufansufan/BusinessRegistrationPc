@@ -1,0 +1,219 @@
+<template>
+  <div class="class-manage-box">
+    <router-view v-if="lastRoute"/>
+    <template v-else>
+      <div class="select-tools">
+        <div>
+          <div>
+            <el-select v-model="select.sex" placeholder="年度">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="季节">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="期别">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="年级">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="科目">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="类别">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="班型">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="学部">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-input v-model="select.name" placeholder="老师姓名" style="width: 194px"/>
+          </div>
+          <div>
+            <el-input v-model="select.name" placeholder="班级名称" style="width: 414px"/>
+          </div>
+          <div>
+            <el-checkbox-group v-model="select.week">
+              <el-checkbox label="周一"/>
+              <el-checkbox label="周二"/>
+              <el-checkbox label="周三"/>
+              <el-checkbox label="周四"/>
+              <el-checkbox label="周五"/>
+              <el-checkbox label="周六"/>
+              <el-checkbox label="周日"/>
+            </el-checkbox-group>
+            <el-checkbox-group v-model="select.day">
+              <el-checkbox label="上午"/>
+              <el-checkbox label="下午"/>
+              <el-checkbox label="晚上"/>
+            </el-checkbox-group>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="状态">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-select v-model="select.sex" placeholder="校区">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-setting" @click="$router.push({name: 'BatchSetting'})">批量设置</el-button>
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-search">搜索</el-button>
+          </div>
+          <div>
+            <el-button icon="el-icon-refresh">重置搜索条件</el-button>
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-plus" @click="$router.push({name: 'AddClass'})">新增</el-button>
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-upload2">导入模板</el-button>
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-upload2">批量导入</el-button>
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-download">导出</el-button>
+          </div>
+        </div>
+      </div>
+      <el-table :data="dataList" stripe border style="width: 100%">
+        <el-table-column prop="date" label="校区"/>
+        <el-table-column prop="name" label="班级名称" width="150"/>
+        <el-table-column prop="address" label="期别"/>
+        <el-table-column prop="address" label="老师"/>
+        <el-table-column prop="address" label="重复周期"/>
+        <el-table-column prop="address" label="教室"/>
+        <el-table-column prop="address" label="时段"/>
+        <el-table-column prop="address" label="上课日期"/>
+        <el-table-column prop="address" label="时间安排规律"/>
+        <el-table-column prop="address" label="价格"/>
+        <el-table-column prop="address" label="剩余/总课次"/>
+        <el-table-column prop="address" label="招生情况"/>
+        <el-table-column prop="address" label="状态"/>
+        <el-table-column prop="address" label="操作人"/>
+        <el-table-column label="操作" width="150">
+          <template slot-scope="scope">
+            <el-button type="text" @click="modify('edit', scope.row)">编辑</el-button>
+            <el-button type="text">删除</el-button>
+            <el-button type="text">下架</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        v-show="count"
+        :page-sizes="pageSizes"
+        :page-size="limit"
+        :total="count"
+        :current-page="page"
+        :layout="pageLayout"
+        class="campus-pagination"
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+      />
+    </template>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+export default {
+  name: 'CourseManagement',
+  mixins: [tables],
+  data() {
+    return {
+      select: {
+        week: []
+      },
+      dataList: [
+        {
+          address: '34133'
+        }
+      ]
+    }
+  },
+  computed: {
+    lastRoute() {
+      return this.$route.matched.length > 3
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.class-manage-box{
+
+}
+</style>

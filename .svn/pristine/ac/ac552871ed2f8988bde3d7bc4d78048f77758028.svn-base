@@ -1,0 +1,15 @@
+import request from '@/utils/request'
+
+// 获取教室列表
+export const getClassroomList = data =>
+  request({
+    url: '/a/backgroundSystem/classroom/findClassroomList',
+    data
+  })
+
+// 新增编辑保存教室
+export const editClassroom = data =>
+  request({
+    url: '/a/backgroundSystem/classroom/editClassroom',
+    data
+  })

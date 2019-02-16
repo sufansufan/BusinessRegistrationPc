@@ -1,0 +1,53 @@
+<template>
+  <div class="attend-class-box">
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="date" label="校区"/>
+      <el-table-column prop="name" label="班级名称" width="150"/>
+      <el-table-column prop="address" label="听课证编号" width="110"/>
+      <el-table-column prop="address" label="科目"/>
+      <el-table-column prop="address" label="老师"/>
+      <el-table-column prop="address" label="重复周期"/>
+      <el-table-column prop="address" label="时段"/>
+      <el-table-column prop="address" label="教室"/>
+      <el-table-column prop="address" label="开课日期"/>
+      <el-table-column prop="address" label="结课日期"/>
+      <el-table-column prop="address" label="价格"/>
+      <el-table-column prop="address" label="实付金额"/>
+      <el-table-column prop="address" label="支付方式"/>
+      <el-table-column prop="address" label="POS流水号" width="110"/>
+      <el-table-column prop="address" label="状态"/>
+      <el-table-column prop="address" label="操作时间"/>
+      <el-table-column prop="address" label="操作人"/>
+      <el-table-column label="操作" fixed="right" width="200">
+        <template slot-scope="scope">
+          <el-button type="text">转班</el-button>
+          <el-button type="text">调课</el-button>
+          <el-button type="text">打印听课证</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+export default {
+  name: 'AttendClass',
+  mixins: [tables],
+  data() {
+    return {
+      dataList: []
+    }
+  }
+}
+</script>

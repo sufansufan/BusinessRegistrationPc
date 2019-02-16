@@ -1,0 +1,51 @@
+<template>
+  <div class="campus-select">
+    <div class="select-tools">
+      <div>
+        <div>
+          <h2 class="campus-num">校区总数 <span class="act-color">1</span></h2>
+        </div>
+        <div>
+          <h2 class="campus-num">财务主体总数 <span class="act-color">20</span></h2>
+        </div>
+      </div>
+      <div class="btn">
+        <div>
+          <el-select v-model="select.state" placeholder="状态" clearable>
+            <el-option :value="true" label="启用"/>
+            <el-option :value="false" label="停用"/>
+          </el-select>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-search">搜索</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-download">导出</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      select: {
+        state: ''
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.campus-select{
+  .select-tools{
+    border-bottom: 1px solid #f0f0f0;
+    .campus-num{
+      margin: 0px;
+    }
+  }
+}
+</style>

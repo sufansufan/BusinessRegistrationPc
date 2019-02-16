@@ -1,0 +1,123 @@
+import { getSysDictList } from '@/api'
+import { getCampusTree, getCityTree } from '@/api/backstage/campusManagement'
+import { strFirstUpper, treeChildrenEmpty } from '@/utils'
+
+const constant = {
+  state: {
+    noConstant: ['campus', 'role', 'city'], // 不是常量集合，还需在constant里声明
+    constant: {
+      campus: [], // 校区
+      role: [], // 角色
+      city: [], // 省市区
+      grade: [], // 年级
+      subject: [], // 科目
+      known_channle: [], // 了解渠道
+      classroom_equipment: [], // 设备
+      week_day_type: [], // 周期
+      particular_year: [], // 年份
+      season: [], // 季节
+      periods: [], // 期别
+      project_type: [], // 类别
+      class_type: [], // 班型
+      timeslot_type: [], // 时段
+      class_status: [], // 班级状态
+      department_type: [], // 学部
+      turn_class_condition: [], // 转班条件
+      teacher_post_nature: [], // 岗位性质
+      nation_type: [], // 民族
+      political_affiliation_type: [], // 政治面貌
+      marital_status: [], // 婚姻状况
+      charge_type: [], // 收费项目类别
+      payment_type: [] // 支付方式
+    }
+  },
+  mutations: {
+    SET_DICT(state, { type, list }) {
+      state.constant[type] = list
+    },
+    SET_CAMPUS(state, list) {
+      state.constant.campus = list
+    },
+    SET_ROLE(state, list) {
+      state.constant.role = list
+    },
+    SET_CITY(state, list) {
+      state.constant.city = list
+    }
+  },
+  actions: {
+    getConstant({ dispatch, state }, name) {
+      const events = []
+      const isConstant = name => {
+        if (state.noConstant.includes(name)) {
+          events.push(dispatch('get' + strFirstUpper(name)))
+        } else {
+          events.push(dispatch('getDict', name))
+        }
+      }
+      if (Array.isArray(name)) {
+        for (const item of name) {
+          if (state.constant[item].length) continue
+          isConstant(item)
+        }
+      } else {
+        if (state.constant[name].length) return
+        isConstant(name)
+      }
+      return Promise.all(events)
+    },
+    getDict({ commit }, type) {
+      return new Promise((resolve, reject) => {
+        getSysDictList({ type })
+          .then(response => {
+            const list = response.data.list
+            commit('SET_DICT', { type, list })
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+    getCampus({ commit }) {
+      return new Promise((resolve, reject) => {
+        getCampusTree({
+          adminOrganType: 1,
+          adminOrganStatus: true
+        })
+          .then(response => {
+            commit('SET_CAMPUS', treeChildrenEmpty(response.data.list))
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+    getCity({ commit }) {
+      return new Promise((resolve, reject) => {
+        getCityTree({})
+          .then(response => {
+            commit('SET_CITY', treeChildrenEmpty(response.data.list))
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+    getRole({ commit }) {
+      // return new Promise((resolve, reject) => {
+      //   getRoleList({})
+      //     .then(response => {
+      //       commit('SET_ROLE', response.data.list)
+      //       resolve()
+      //     })
+      //     .catch(error => {
+      //       reject(error)
+      //     })
+      // })
+    }
+  }
+}
+export default constant

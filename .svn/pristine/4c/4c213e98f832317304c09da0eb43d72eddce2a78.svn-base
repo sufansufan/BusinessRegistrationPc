@@ -1,0 +1,172 @@
+<template>
+  <div class="course-label-box">
+    <div>
+      <div>
+        <h3 v-for="(item, index) in labelList" :key="item.label" class="bor-tit">
+          <span @click="clickLabel(index)">{{ item.label }}</span>
+          <transition name="el-fade-in">
+            <i :class="{'act-bg': item.status}"/>
+          </transition>
+        </h3>
+      </div>
+    </div>
+    <div>
+      <div>
+        <div class="list">
+          <el-input v-model="add" placeholder="请输入内容"/>
+          <i class="el-icon-plus act-color"/>
+        </div>
+      </div>
+      <div>
+        <div v-for="(item, index) in dataList" :key="item.id" class="list">
+          <el-input v-model="item.label" :disabled="item.disabledStatus" placeholder="请输入内容"/>
+          <i class="el-icon-delete act-color"/>
+          <i class="el-icon-edit act-color" @click="editLabel(index)"/>
+          <i class="el-icon-arrow-up act-color"/>
+          <i class="el-icon-arrow-down act-color"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  data() {
+    return {
+      add: '',
+      input: '',
+      dataList: [],
+      labelList: [
+        {
+          label: '年份',
+          status: true,
+          type: 'particular_year'
+        },
+        {
+          label: '季节',
+          status: false,
+          type: 'season'
+        },
+        {
+          label: '期别',
+          status: false,
+          type: 'periods'
+        },
+        {
+          label: '年级',
+          status: false,
+          type: 'periods'
+        },
+        {
+          label: '科目',
+          status: false,
+          type: 'periods'
+        },
+        {
+          label: '类别',
+          status: false,
+          type: 'periods'
+        },
+        {
+          label: '班型',
+          status: false,
+          type: 'periods'
+        }
+      ]
+    }
+  },
+  computed: {
+    ...mapGetters(['constant'])
+  },
+  created() {
+    this.$store.dispatch('getConstant', ['particular_year', 'season', 'periods']).then(() => {
+      this.dataList = this.constant.particular_year
+      this.dataList.map(item => {
+        item.disabledStatus = true
+      })
+    })
+  },
+  methods: {
+    clickLabel(index) {
+      this.labelList.map(item => {
+        item.status = false
+      })
+      this.labelList[index].status = true
+      this.dataList = this.constant[this.labelList[index].type]
+      this.dataList.map(item => {
+        item.disabledStatus = true
+      })
+    },
+    editLabel(index) {
+      // this.dataList[index].disabledStatus = false
+      this.$set(this.dataList[index], 'disabledStatus', false)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.course-label-box{
+  display: flex;
+  & > div:first-child{
+    width: 5%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  & > div:last-child{
+    margin-left: 20px;
+    & > div {
+      & > div{
+        margin-bottom: 0px;
+      }
+      .el-input{
+        width: 250px;
+      }
+    }
+    & > div:first-child{
+      display: flex;
+      .el-icon-plus{
+        margin-left: 20px;
+        line-height: 32px;
+        cursor: pointer;
+      }
+    }
+  }
+  .bor-tit{
+    width: 52px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .act-bg{
+    width: 52px;
+    height: 12px
+  }
+  .list{
+    margin: 10px 0px;
+    display: flex;
+    & > i {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      background: #f2f2f2;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      margin-left: 20px;
+    }
+  }
+}
+</style>
+<style lang="scss">
+.course-label-box{
+  .list{
+    .el-input.is-disabled .el-input__inner{
+      background-color: #ffffff;
+      color: #5a5e66;
+    }
+  }
+}
+</style>

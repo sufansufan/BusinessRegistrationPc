@@ -1,0 +1,50 @@
+<template>
+  <div class="student-info-manage">
+    <el-tabs v-model="activeName">
+      <el-tab-pane label="按所在班级" name="first">
+        <student-table>
+          <div slot="select">
+            <class-select/>
+          </div>
+        </student-table>
+      </el-tab-pane>
+      <el-tab-pane label="按个人属性" name="second">
+        <student-table>
+          <div slot="select">
+            <student-select/>
+          </div>
+        </student-table>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</template>
+
+<script>
+import StudentTable from './components/StudentTable'
+import ClassSelect from './components/ClassSelect'
+import StudentSelect from './components/StudentSelect'
+export default {
+  components: {
+    StudentTable,
+    ClassSelect,
+    StudentSelect
+  },
+  data() {
+    return {
+      activeName: 'first',
+      select: {}
+    }
+  },
+  methods: {
+
+  }
+}
+</script>
+
+<style lang="scss">
+.student-info-manage{
+  .el-tabs__nav-scroll{
+    display: block;
+  }
+}
+</style>

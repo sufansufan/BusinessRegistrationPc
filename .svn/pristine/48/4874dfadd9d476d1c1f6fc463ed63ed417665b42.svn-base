@@ -1,0 +1,76 @@
+<template>
+  <div class="class-add-box">
+    <class-datail>
+      <div slot="classList" class="class-list-box-hander">
+        <el-button type="goback" icon="el-icon-arrow-left" @click="$router.go(-1)">返回</el-button>
+        <step-bar :step-status="stepStatus"/>
+      </div>
+      <div slot="classList" class="class-list">
+        <div>
+          <div v-show="!stepStatus">
+            <class-list/>
+          </div>
+        </div>
+        <div>
+          <div v-show="stepStatus">
+            <class-arrangement/>
+          </div>
+        </div>
+        <div class="class-list-btn">
+          <div v-if="stepStatus === 0">
+            <el-button type="primary" size="big" @click="stepClick('next')">下一步</el-button>
+          </div>
+          <div v-if="stepStatus === 1">
+            <el-button type="primary" size="big" @click="stepClick('goback')">上一步</el-button>
+            <el-button type="primary" size="big" @click="stepClick('submit')">提交</el-button>
+          </div>
+        </div>
+      </div>
+    </class-datail>
+  </div>
+
+</template>
+
+<script>
+import StepBar from './components/StepBar'
+import ClassList from './components/ClassList'
+import ClassArrangement from './components/ClassArrangement'
+import ClassDatail from './components/ClassDatail'
+export default {
+  name: 'AddClass',
+  components: {
+    StepBar,
+    ClassList,
+    ClassArrangement,
+    ClassDatail
+  },
+  data() {
+    return {
+      classForm: {
+
+      },
+      stepStatus: 0
+    }
+  },
+  methods: {
+    stepClick(type) {
+      if (type === 'next') {
+        this.stepStatus = 1
+      } else if (type === 'goback') {
+        this.stepStatus = 0
+      } else {
+        this.stepStatus = 2
+        this.$nextTick(() => {
+          this.$router.push({ name: 'ClassManagement' })
+        })
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.class-add-box{
+
+}
+</style>

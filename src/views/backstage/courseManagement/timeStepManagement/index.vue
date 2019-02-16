@@ -1,0 +1,239 @@
+<template>
+  <div class="time-step-management-box">
+    <div class="select-tools">
+      <div/>
+      <div class="btn">
+        <div>
+          <el-button type="primary" icon="el-icon-plus" @click="modify('add')">新增</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column label="时段">
+        <template slot-scope="scope">
+          <div>
+            {{ scope.row.startTime }} - {{ scope.row.endTime }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column prop="Spendhours" label="时长"/>
+      <el-table-column prop="address" label="备注">
+        <template slot-scope="scope">
+          <div>
+            {{ getRemark(scope.row.startTime) }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态">
+        <template slot-scope="scope">
+          <div v-html="scope.row.statusHtm"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button :disabled="!scope.row.whetherEdit" type="text" @click="modify('edit', scope.row)">编辑</el-button>
+          <el-button :disabled="!scope.row.whetherDelete" type="text" @click="deleteStep(scope.row.id)">删除</el-button>
+          <el-button type="text" @click="modifyStatus(scope.row)">{{ scope.row.status === true ? '停用' : '启用' }}</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      class="campus-pagination"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <Dialog ref="dialog" width="30%" top="250px">
+      <el-form ref="timeStepForm" :model="timeStepForm" :rules="timeStepRules" label-position="top" class="time-step-form">
+        <el-form-item label="开始时间" prop="startTime">
+          <el-time-select
+            v-model="timeStepForm.startTime"
+            :picker-options="{
+              start: '06:00',
+              step: '00:10',
+              end: '22:00'
+            }"
+            style="width: 100%"
+            placeholder="选择开始时间"/>
+        </el-form-item>
+        <el-form-item label="时长">
+          <strong>{{ timeStep || 0 }}分钟</strong>
+        </el-form-item>
+        <el-form-item label="结束时间" prop="endTime">
+          <el-time-select
+            v-model="timeStepForm.endTime"
+            :picker-options="{
+              start: '06:00',
+              step: '00:10',
+              end: '22:00'
+            }"
+            style="width: 100%"
+            placeholder="选择开始时间"/>
+        </el-form-item>
+        <el-form-item label="备注">
+          <strong>{{ remark }}</strong>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" size="big" @click="saveTimeslot">确 定</el-button>
+        <el-button size="big" @click="$refs.dialog.show = false">取 消</el-button>
+      </span>
+    </Dialog>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import Dialog from '@/components/Dialog'
+import { getSpendhours } from '@/utils'
+import { getTimeslotList, editTimeslot, deleteTimeslot, editTimeslotStatus } from '@/api/backstage/courseManagement'
+export default {
+  name: 'TimeStepManagement',
+  components: {
+    Dialog
+  },
+  mixins: [tables],
+  data() {
+    return {
+      select: {
+
+      },
+      dataList: [],
+      timeStepForm: {
+        id: '',
+        startTime: '',
+        endTime: ''
+      },
+      shallowTimeStep: {},
+      timeStepRules: {
+        startTime: [
+          { required: true, message: '请选择开始时间', trigger: 'change' }
+        ],
+        endTime: [
+          { required: true, message: '请选择结束时间', trigger: 'change' }
+        ]
+      }
+    }
+  },
+  computed: {
+    timeStep() {
+      return getSpendhours(this.timeStepForm.startTime, this.timeStepForm.endTime)
+    },
+    remark() {
+      return this.getRemark(this.timeStepForm.startTime)
+    }
+  },
+  created() {
+    this.fetchData()
+    this.shallowTimeStep = {
+      ...this.timeStepForm
+    }
+  },
+  methods: {
+    fetchData() {
+      this.BFD(getTimeslotList({ timeslotStatus: '' }).then(({ data }) => {
+        const { count, list } = data
+        this.count = count
+        this.dataList = list
+        this.dataList.map(item => {
+          item.Spendhours = getSpendhours(item.startTime, item.endTime)
+          item.statusHtm = this.renderStateTag(item.status ? '启用' : '停用')
+          return item
+        })
+      }))
+    },
+    modify(type, row) {
+      if (type === 'edit') {
+        const { startTime, endTime, id } = row
+        this.timeStepForm = {
+          id,
+          startTime,
+          endTime
+        }
+        this.$refs.dialog.setTitle('编辑时段')
+      } else {
+        this.timeStepForm = {
+          ...this.shallowTimeStep
+        }
+        this.$refs.dialog.setTitle('新增时段')
+      }
+      this.$refs.dialog.show = true
+    },
+    getRemark(start) {
+      var remark = ''
+      if (start > '07:00' && start < '11.59') {
+        remark = '上午'
+      } else if (start > '12:00' && start < '16:59') {
+        remark = '下午'
+      } else if (start > '17:00' && start < '23:59') {
+        remark = '晚上'
+      } else {
+        remark = ''
+      }
+      return remark
+    },
+    saveTimeslot() {
+      this.$refs.timeStepForm.validate(valid => {
+        if (valid) {
+          const params = {
+            ...this.timeStepForm
+          }
+          editTimeslot({ timeslot: params }).then(res => {
+            this.$refs.dialog.show = false
+            params.id ? this.$message.success('编辑成功') : this.$message.success('新增成功')
+            this.fetchData()
+          })
+        } else {
+          return false
+        }
+      })
+    },
+    deleteStep(ids) {
+      this.$confirm('是否删除改数据?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteTimeslot({ ids }).then(res => {
+          this.$message.success('删除成功')
+          this.fetchData()
+        })
+      })
+    },
+    modifyStatus(row) {
+      this.$confirm('是否进行状态修改?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const params = {
+          id: row.id,
+          status: !row.status
+        }
+        editTimeslotStatus({ timeslot: params }).then(res => {
+          this.$message.success('修改成功')
+          this.fetchData()
+        })
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.time-step-management-box{
+  .time-step-form{
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    .el-form-item{
+      width: calc(50% - 10px);
+    }
+  }
+}
+</style>

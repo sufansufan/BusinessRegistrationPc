@@ -1,0 +1,47 @@
+<template>
+  <div class="change-class-record">
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="date" label="订单ID"/>
+      <el-table-column prop="name" label="原校区" width="150"/>
+      <el-table-column prop="address" label="原班级名称" width="150"/>
+      <el-table-column prop="address" label="期别"/>
+      <el-table-column prop="address" label="老师"/>
+      <el-table-column prop="address" label="重复周期"/>
+      <el-table-column prop="address" label="时段"/>
+      <el-table-column prop="address" label="开课日期"/>
+      <el-table-column prop="address" label="转班课次"/>
+      <el-table-column prop="address" label="目标校区"/>
+      <el-table-column prop="address" label="目标班级名称" width="150"/>
+      <el-table-column prop="address" label="期别"/>
+      <el-table-column prop="address" label="老师" width="110"/>
+      <el-table-column prop="address" label="重复周期"/>
+      <el-table-column prop="address" label="时段"/>
+      <el-table-column prop="address" label="开课时间"/>
+      <el-table-column prop="address" label="操作时间"/>
+      <el-table-column prop="address" label="操作人"/>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+export default {
+  name: 'ChangeClassRecord',
+  mixins: [tables],
+  data() {
+    return {
+      dataList: []
+    }
+  }
+}
+</script>

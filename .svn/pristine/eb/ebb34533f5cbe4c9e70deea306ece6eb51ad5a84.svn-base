@@ -1,0 +1,104 @@
+<template>
+  <div class="payment-record-box">
+    <div v-for="(list, index) in dataList" :key="index" class="payment-record-box-list">
+      <div class="payment-record-box-list-head">
+        <div class="tit">
+          <span>财务主体</span>
+          <span>{{ list.financeName }}</span>
+        </div>
+        <div class="tit">
+          <span>支付方式</span>
+          <span>{{ list.paymentTypeLable }}</span>
+        </div>
+        <div class="tit">
+          <span>POS流水号</span>
+          <span>{{ list.posNumber }}</span>
+        </div>
+        <div class="tit">
+          <span>支付总金额</span>
+          <count-num :num="list._totalPrice" prefix="￥"/>
+        </div>
+        <div class="tit">
+          <span>操作人</span>
+          <span>{{ list.updateByName }}</span>
+        </div>
+      </div>
+      <comm-table/>
+    </div>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import { getPaymentList } from '@/api/foreground/apply'
+import CommTable from '@/views/components/CommTable'
+export default {
+  inject: ['sid'],
+  components: {
+    CommTable
+  },
+  mixins: [tables],
+  data() {
+    return {
+      dataList: []
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      getPaymentList({
+        id: this.sid,
+        page: this.page,
+        limit: this.limit
+      }).then(res => {
+        this.dataList = res.data.paymentInfoList.map(item => {
+          item._totalPrice = item.order
+            .reduce((s, n) => ({ realPayment: +s.realPayment + +n.realPayment }), { realPayment: 0 }).realPayment
+          return item
+        })
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.payment-record-box {
+  &-list {
+    &-head {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      .tit {
+        flex: 1;
+        margin: 0 10px 10px 0;
+        padding: 0 10px;
+        line-height: 33px;
+        background: #eaeaea;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        &:nth-child(2) {
+          max-width: 250px;
+        }
+        &:nth-child(3) {
+          flex-grow: 1.3;
+        }
+        &:last-child {
+          max-width: 250px;
+          margin-right: 0;
+        }
+        > span:first-child {
+          color: #707070;
+          &:not(:only-of-type) {
+            padding-right: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,186 @@
+<template>
+  <div class="financia-entity-manage-box">
+    <div class="select-tools">
+      <div/>
+      <div class="btn">
+        <div>
+          <el-button type="primary" icon="el-icon-plus" @click="modify('add')">新增</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="financeName" label="财务主体名称"/>
+      <el-table-column prop="countAdminOrgan" label="关联区数" width="150"/>
+      <el-table-column prop="createDate" label="创建时间"/>
+      <el-table-column prop="status" label="状态">
+        <template slot-scope="scope">
+          <div v-html="scope.row.statusHtm"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="modify('edit', scope.row)">编辑</el-button>
+          <el-button type="text" @click="modifyStatus(scope.row)">{{ scope.row.status === true ? '停用' : '启用' }}</el-button>
+          <el-button type="text" @click="deleteInfo(scope.row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      class="campus-pagination"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <Dialog ref="dialog" width="30%" top="300px">
+      <el-form ref="financiaForm" :model="financiaForm" :rules="financiaRules" :key="key">
+        <el-form-item label="名称" prop="name">
+          <el-input v-model.trim="financiaForm.name"/>
+        </el-form-item>
+        <el-form-item label="账号" prop="accountNumber">
+          <el-input v-model.trim="financiaForm.accountNumber"/>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="$refs.dialog.show = false">取 消</el-button>
+        <el-button type="primary" size="small" @click="submit">确 定</el-button>
+      </span>
+    </Dialog>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import tables from '@/mixin/tables'
+import Dialog from '@/components/Dialog'
+import { getFinanceBodyList, editFinanceBody, editFinanceBodyStatus, deleteFinanceBody } from '@/api/backstage/campusManagement'
+import { parseTime } from '@/utils'
+import { validateNumber } from '@/utils/validate'
+export default {
+  components: {
+    Dialog
+  },
+  mixins: [tables],
+  data() {
+    const number = (rule, value, callback) => {
+      if (!validateNumber(value)) {
+        callback(new Error('请输入数字'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      dataList: [],
+      financiaForm: {
+        id: '',
+        name: '',
+        accountNumber: ''
+      },
+      shallowFinancia: {},
+      key: 1,
+      financiaRules: {
+        name: [
+          { required: true, message: '名称不能为空', trigger: 'blur' },
+          { min: 1, max: 100, message: '最长为100个字符', trigger: 'blur' }
+        ],
+        accountNumber: [
+          { required: true, validator: number, trigger: 'blur' },
+          { min: 1, max: 100, message: '最长为100个字符', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  computed: {
+    ...mapGetters(['userInfo'])
+  },
+  created() {
+    this.fetchData()
+    this.shallowFinancia = { ...this.financiaForm }
+  },
+  methods: {
+    fetchData(status = '') {
+      const params = {
+        page: this.page,
+        limit: this.limit,
+        adminOrganParentIds: 1,
+        adminOrganStatus: status
+      }
+      this.BFD(getFinanceBodyList(params).then(({ data }) => {
+        const { count, list } = data
+        this.count = count
+        this.dataList = list
+        this.dataList.map(item => {
+          item.createDate = parseTime(item.createDate, 'y-m-d')
+          item.statusHtm = this.renderStateTag(item.status ? '启用' : '停用')
+          return item
+        })
+      }))
+    },
+    modify(type, row) {
+      if (type === 'edit') {
+        this.$refs.dialog.setTitle('编辑财务主体')
+        const { accountNumber, financeName: name, id } = row
+        this.financiaForm = {
+          accountNumber,
+          name,
+          id
+        }
+      } else {
+        this.financiaForm = { ...this.shallowFinancia }
+        this.$refs.dialog.setTitle('新增财务主体')
+      }
+      this.key = this.key + 1
+      this.$refs.dialog.show = true
+    },
+    submit() {
+      this.$refs.financiaForm.validate(valid => {
+        if (valid) {
+          editFinanceBody({ financeBody: this.financiaForm }).then(res => {
+            this.financiaForm.id ? this.$message.success('编辑成功') : this.$message.success('新增成功')
+            this.$refs.dialog.show = false
+            this.fetchData()
+          })
+        } else {
+          return false
+        }
+      })
+    },
+    modifyStatus(row) {
+      this.$confirm('是否进行状态修改?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const params = {
+          id: row.id,
+          status: !row.status
+        }
+        editFinanceBodyStatus({ financeBody: params }).then(res => {
+          this.$message.success('修改成功')
+          this.fetchData()
+        })
+      })
+    },
+    deleteInfo(id) {
+      this.$confirm('是否删除改数据?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteFinanceBody({ ids: id }).then(res => {
+          this.$message.success('删除成功')
+          this.fetchData()
+        })
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+
+</style>

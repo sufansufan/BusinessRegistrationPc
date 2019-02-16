@@ -1,0 +1,95 @@
+// 引入地图
+import maps from 'qqmap'
+
+const TMap = function(address, type) {
+  if (!(this instanceof TMap)) return new TMap(address, type)
+  return this.initMap(address, type)
+}
+TMap.prototype = {
+  initMap: function(address, type) {
+    return new Promise((resolve, reject) => {
+      maps.init('CKMBZ-K26RX-DSS43-Z2TTF-VWDBZ-BYFE5', () => {
+        const myLating = new maps.LatLng(39.916527, 116.397128)
+        const myOptions = {
+          zoom: 14,
+          center: myLating,
+          mapTypeId: maps.MapTypeId.ROADMAP
+        }
+        this.map = new maps.Map(document.getElementById('map-container'), myOptions)
+        if (address) {
+          resolve(this.getAddress(address, type))
+        }
+      })
+    })
+  },
+  getAddress: function(address, type) {
+    var _this = this
+    return new Promise((resolve, reject) => {
+      if (type === 'position') {
+        const geocoder = new maps.Geocoder({
+          // 设置服务请求成功的回调函数
+          complete: (result) => {
+            resolve(_this.getMarker(address, type, result))
+          },
+          error: () => {
+            reject()
+          }
+        })
+        geocoder.getLocation(address)
+      } else if (type === 'coordinate') {
+        resolve(_this.getMarker(address, type))
+      }
+    })
+  },
+  getMarker: function(address, type, result) {
+    const p = result ? JSON.parse(JSON.stringify(result.detail.location)) : address
+    return new Promise((resolve, reject) => {
+      var position = type === 'coordinate' ? new maps.LatLng(p.latitude, p.longitude) : new maps.LatLng(p.lat, p.lng)
+      this.map.setCenter(position)
+      var marker = new maps.Marker({
+        map: this.map,
+        position,
+        draggable: true,
+        title: '坐标地址为：' + position
+      })
+      resolve(marker)
+    })
+  }
+  /*  dragendMap() {
+    return new Promise((resolve, reject) => {
+      var middleControl = document.createElement('div')
+      middleControl.style.left = '47.8%'
+      middleControl.style.top = '213px'
+      middleControl.style.position = 'relative'
+      middleControl.style.width = '36px'
+      middleControl.style.height = '36px'
+      middleControl.style.zIndex = '100000'
+      middleControl.innerHTML = '<img src="https://www.cdlhome.com.sg/mobile_assets/images/icon-location.png" />'
+      const container = document.getElementById('map-container')
+      if (!container.children[0] || !container.children[0].innerHTML.includes('img')) {
+        document.getElementById('map-container').appendChild(middleControl)
+      }
+      maps.event.addListener(this.map, 'center_changed', () => {
+        resolve(this.map.getCenter())
+      })
+    })
+  } */
+  /* getMousemovePosition() {
+    var label = new maps.Label({
+      map: this.map,
+      content: ''
+    })
+    maps.event.addListener(this.map, 'mousemove', e => {
+      const latLng = e.latLng
+      label.setPosition(latLng)
+      const position = latLng.getLng().toFixed(6) + ',' + latLng.getLng().toFixed(6)
+      label.setContent(position)
+    })
+    return new Promise((resolve, reject) => {
+      maps.event.addListener(this.map, 'click', e => {
+        resolve(e.latLng)
+      })
+    })
+  } */
+}
+export default TMap

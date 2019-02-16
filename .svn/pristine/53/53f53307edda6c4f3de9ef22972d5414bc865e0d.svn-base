@@ -1,0 +1,84 @@
+<template>
+  <div class="financia-entity-manage-box">
+    <div class="select-tools">
+      <div/>
+      <div class="btn">
+        <div>
+          <el-button type="primary" icon="el-icon-plus" @click="modify('add')">新增</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="date" label="财务主体名称"/>
+      <el-table-column prop="name" label="关联区数" width="150"/>
+      <el-table-column prop="address" label="创建时间"/>
+      <el-table-column prop="address" label="状态"/>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button type="primary" @click="modify('edit', scope.row)">编辑</el-button>
+          <el-button type="primary">停用</el-button>
+          <el-button type="primary">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      class="campus-pagination"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <Dialog ref="dialog" width="30%" top="300px">
+      <el-form ref="financiaForm" :model="financiaForm">
+        <el-form-item label="名称">
+          <el-input v-model="financiaForm.name"/>
+        </el-form-item>
+        <el-form-item label="账号">
+          <el-input v-model="financiaForm.no"/>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="$refs.dialog.show = false">取 消</el-button>
+        <el-button type="primary" size="small">确 定</el-button>
+      </span>
+    </Dialog>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import Dialog from '@/components/Dialog'
+export default {
+  components: {
+    Dialog
+  },
+  mixins: [tables],
+  data() {
+    return {
+      dataList: [],
+      financiaForm: {
+        name: '',
+        region: ''
+      }
+    }
+  },
+  methods: {
+    modify(type) {
+      if (type === 'edit') {
+        this.$refs.dialog.setTitle('编辑财务主体')
+      } else {
+        this.$refs.dialog.setTitle('新增财务主体')
+      }
+      this.$refs.dialog.show = true
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+
+</style>

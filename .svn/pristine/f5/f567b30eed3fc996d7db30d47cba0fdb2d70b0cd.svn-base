@@ -1,0 +1,70 @@
+<template>
+  <div class="student-info-manage">
+    <el-tabs v-model="activeName">
+      <el-tab-pane label="按所在班级" name="first">
+        <student-table ref="class">
+          <div slot="select">
+            <class-select @selectChange = "selectChange"/>
+          </div>
+        </student-table>
+      </el-tab-pane>
+      <el-tab-pane label="按个人属性" name="second">
+        <student-table ref="people">
+          <div slot="select">
+            <student-select @selectChange = "selectChange"/>
+          </div>
+        </student-table>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</template>
+
+<script>
+import StudentTable from './components/StudentTable'
+import ClassSelect from './components/ClassSelect'
+import StudentSelect from './components/StudentSelect'
+export default {
+  components: {
+    StudentTable,
+    ClassSelect,
+    StudentSelect
+  },
+  data() {
+    return {
+      activeName: 'first',
+      select: {}
+    }
+  },
+
+  methods: {
+    selectChange(type, select) {
+      if (type === 'people') {
+        const { date } = select
+        const params = {
+          ...select
+        }
+        params.birthdayStartDate = date[0] || ''
+        params.birthdayEndDate = date[0] || ''
+        delete params.date
+        this.$refs.people.fetchData(params)
+      } else {
+        const { classWeekDay, dateDivide } = select
+        const params = {
+          ...select
+        }
+        params.classWeekDay = classWeekDay.join(',')
+        params.dateDivide = dateDivide.join(',')
+        this.$refs.class.fetchData(params)
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.student-info-manage{
+  .el-tabs__nav-scroll{
+    display: block;
+  }
+}
+</style>

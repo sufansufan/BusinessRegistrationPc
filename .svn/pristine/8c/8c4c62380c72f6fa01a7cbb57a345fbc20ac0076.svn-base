@@ -1,0 +1,71 @@
+<template>
+  <div>
+    <comm-table v-loading="loading" :data="dataList" :columns="columns" :count="count">
+      <template slot-scope="{row}">
+        <el-button type="text">查看</el-button>
+      </template>
+    </comm-table>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import { getBigRefundOrderList } from '@/api/foreground/apply'
+import { parseTime } from '@/utils'
+export default {
+  mixins: [tables],
+  inject: ['sid'],
+  data() {
+    return {
+      dataList: [],
+      columns: [
+        { label: '发起时间', prop: 'createDate', width: 150, fixed: 'left' },
+        { label: '退费单ID', prop: 'refundRecordNo', fixed: 'left' },
+        { label: '校区', prop: 'campusName', fixed: 'left' },
+        { label: '财务主体', prop: 'financeName', fixed: 'left' },
+        { label: '学员姓名', prop: 'studentName', fixed: 'left' },
+        { label: '联系电话', prop: 'studentPhone', width: 100, fixed: 'left' },
+        [
+          { label: '班级名称', prop: 'className', width: 250 },
+          { label: '收费内容', prop: 'chargeName', width: 150 },
+          { label: '购课/总课次', prop: ['payAttendCount', 'classttendCount'], width: 150 },
+          { label: '退费课次数', prop: 'refundAttendNumber', width: 150 },
+          { label: '应付价格', prop: 'price', width: 150, type: 'num', pre: '￥' },
+          { label: '实付价格', prop: 'realPayment', width: 150, type: 'num', pre: '￥' },
+          { label: '课次退费', prop: 'classRefundAmount', width: 150, type: 'num', pre: '￥' },
+          { label: '额外退费', prop: 'otherRefundAmount', width: 150, type: 'num', pre: '￥' },
+          { label: '其他退费', prop: 'otherOrderRefundAmount', width: 150, type: 'num', pre: '￥' },
+          { label: '退费总额', prop: 'realRefundAmount', width: 150, type: 'num', pre: '￥' }
+        ],
+        { label: '打款金额', prop: 'realRefundAmount' },
+        { label: '状态', prop: 'statusLabel' },
+        { label: '打款流水号', prop: 'remitNo', width: 100 },
+        { label: '操作人', prop: 'updateByName' },
+        { label: '操作', prop: 'operation', fixed: 'right' }
+      ]
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      this.BFD(getBigRefundOrderList({
+        studentId: this.sid,
+        limit: this.limit,
+        page: this.page
+      }).then(res => {
+        const { count, list } = res.data
+        this.count = count
+        this.dataList = list.map(item => {
+          item.createDate = parseTime(item.createDate)
+          return item
+        })
+      }))
+    }
+  }
+}
+</script>
+
+<style scoped>
+</style>

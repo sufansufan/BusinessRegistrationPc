@@ -1,0 +1,177 @@
+<template>
+  <div class="class-select">
+    <div class="select-tools">
+      <div>
+        <div>
+          <el-select v-model="select.particularYear" placeholder="年份">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.season" placeholder="季节">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.periods" placeholder="期别">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.grade" placeholder="年级">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.subject" placeholder="科目">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.projectType" placeholder="类别">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.classType" placeholder="班型">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.department" placeholder="学部">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-input v-model.trim="select.teacherName" placeholder="老师姓名" style="width: 194px"/>
+        </div>
+        <div>
+          <el-input v-model.trim="select.className" placeholder="班级名称" style="width: 414px"/>
+        </div>
+        <div>
+          <el-checkbox-group v-model="select.classWeekDay">
+            <el-checkbox label="周一"/>
+            <el-checkbox label="周二"/>
+            <el-checkbox label="周三"/>
+            <el-checkbox label="周四"/>
+            <el-checkbox label="周五"/>
+            <el-checkbox label="周六"/>
+            <el-checkbox label="周日"/>
+          </el-checkbox-group>
+          <el-checkbox-group v-model="select.dateDivide">
+            <el-checkbox label="上午"/>
+            <el-checkbox label="下午"/>
+            <el-checkbox label="晚上"/>
+          </el-checkbox-group>
+        </div>
+        <div>
+          <el-select v-model="select.status" placeholder="状态">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.campusId" placeholder="校区">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-search" @click="fetchData">搜索</el-button>
+        </div>
+        <div>
+          <el-button icon="el-icon-refresh">重置搜索条件</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-download">导出</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      select: {
+        operationType: 2,
+        campusId: '',
+        particularYear: '',
+        season: '',
+        periods: '',
+        grade: '',
+        subject: '',
+        projectType: '',
+        classType: '',
+        department: '',
+        teacherName: '',
+        className: '',
+        classWeekDay: [],
+        dateDivide: [],
+        status: ''
+      }
+    }
+  },
+  mounted() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      this.$emit('selectChange', 'class', this.select)
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

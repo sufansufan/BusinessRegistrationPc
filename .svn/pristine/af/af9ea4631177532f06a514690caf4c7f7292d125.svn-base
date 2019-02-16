@@ -1,0 +1,306 @@
+<template>
+  <div class="class-info-list-box">
+    <el-form ref="classForm" :model="classForm" label-position="top">
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="年份">
+            <el-select v-model="classForm.no" placeholder="请选择年份" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="校区">
+            <el-select v-model="classForm.no" placeholder="请选择校区" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="教室">
+            <el-select v-model="classForm.no" placeholder="请选择教室" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="季节">
+            <el-select v-model="classForm.no" placeholder="请选择季节" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="老师">
+            <div class="class-search">
+              <el-input v-model="classForm.no" placeholder="请输入老师" class="input-with-select">
+                <el-select slot="prepend" v-model="classForm.campus" placeholder="请选择校区">
+                  <el-option label="餐厅名" value="1"/>
+                  <el-option label="订单号" value="2"/>
+                  <el-option label="用户电话" value="3"/>
+                </el-select>
+              </el-input>
+            </div>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="课程安排规律">
+            <div class="class-search">
+              <el-input v-model="classForm.no" placeholder="请输入课程安排规律" class="input-with-select">
+                <el-select slot="prepend" v-model="classForm.campus" placeholder="请选择校区">
+                  <el-option label="餐厅名" value="1"/>
+                  <el-option label="订单号" value="2"/>
+                  <el-option label="用户电话" value="3"/>
+                </el-select>
+              </el-input>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="期别">
+            <el-select v-model="classForm.no" placeholder="请选择期别" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="班级补充名称">
+            <el-input v-model="classForm.no" placeholder="请输入班级补充名称"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="总课次">
+            <el-input v-model="classForm.no" placeholder="请输入总课次"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="年级">
+            <el-select v-model="classForm.no" placeholder="请选择年级" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="分数线">
+            <el-input v-model="classForm.no" placeholder="请输入分数线"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="周期">
+            <el-select v-model="classForm.no" placeholder="请选择周期" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="科目">
+            <el-select v-model="classForm.no" placeholder="请选择科目" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="价格">
+            <el-input v-model="classForm.no" placeholder="请输入课价格"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="上课时段">
+            <el-select v-model="classForm.no" placeholder="请选择上课时段" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="类别">
+            <el-select v-model="classForm.no" placeholder="请选择类别" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="招生人数">
+            <el-input v-model="classForm.no" placeholder="请输入招生人数"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="其他选项">
+            <div class="class-checkbox">
+              <div>
+                <el-checkbox-button v-model="classForm.app" label="APP显示" style="width: 100%">APP显示</el-checkbox-button>
+              </div>
+              <div>
+                <el-checkbox-button v-model="classForm.app" label="代收费" style="width: 100%">代收费</el-checkbox-button>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="班型">
+            <el-select v-model="classForm.no" placeholder="请选择班型" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="允许超额人数">
+            <el-input v-model="classForm.no" placeholder="请输入允许超额人数"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item>
+            <div class="class-checkbox class-height">
+              <div>
+                <el-checkbox-button v-model="classForm.app" label="入学测试" style="width: 100%">入学测试</el-checkbox-button>
+              </div>
+              <div>
+                <el-checkbox-button v-model="classForm.app" label="热门班级" style="width: 100%">热门班级</el-checkbox-button>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="转班条件">
+            <el-select v-model="classForm.no" placeholder="请选择转班条件" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="大班标准人数">
+            <el-input v-model="classForm.no" placeholder="请输入大班标准人数"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item>
+            <div class="class-checkbox class-height">
+              <div>
+                <el-checkbox-button v-model="classForm.app" label="允许旁听" style="width: 100%">允许旁听</el-checkbox-button>
+              </div>
+              <div>
+                <el-checkbox-button v-model="classForm.app" label="仅后台可见" style="width: 100%">仅后台可见</el-checkbox-button>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      classForm: {
+
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.class-info-list-box{
+  .el-form-item{
+    .class-checkbox{
+      display: flex;
+      justify-content: space-between;
+      & > div{
+        width: calc(50% - 11px);
+      }
+      &.class-height{
+        margin-top: 30px;
+      }
+    }
+  }
+}
+</style>
+<style lang="scss">
+.class-info-list-box{
+  .el-checkbox-button:last-child .el-checkbox-button__inner{
+    border-radius: 4px;
+    width: 100%;
+  }
+  .class-search{
+    .input-with-select .el-input-group__prepend {
+      background-color: #fff;
+      width: 33%;
+    }
+  }
+}
+</style>

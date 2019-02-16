@@ -1,0 +1,64 @@
+/* Layout */
+import Layout from '@/views/layout/Layout'
+import apply from './apply'
+
+export default {
+  path: '/foreground',
+  component: Layout,
+  redirect: '/foreground/apply',
+  name: 'Foreground',
+  meta: {
+    title: '前台系统',
+    icon: 'foreground'
+  },
+  children: [
+    apply,
+    {
+      path: 'otherpayment',
+      component: () => import('@/views/foreground/otherPayment'),
+      name: 'OtherPayment',
+      meta: {
+        title: '其他收费'
+      },
+      children: [
+        {
+          path: 'otherPay/:id',
+          component: () => import('@/views/foreground/otherPayment/pay'),
+          name: 'OtherPay',
+          meta: {
+            title: '支付'
+          },
+          hidden: true
+        }
+      ]
+    },
+    {
+      path: 'queryClass',
+      component: () => import('@/views/foreground/queryClass'),
+      name: 'QueryClass',
+      meta: {
+        title: '班级查询'
+      },
+      children: [
+        {
+          path: 'classInfo/:id',
+          component: () => import('@/views/foreground/queryClass/classInfo'),
+          name: 'ClassInfo',
+          meta: {
+            title: '班级详情'
+          },
+          hidden: true
+        },
+        {
+          path: 'teacherInfo/:id',
+          component: () => import('@/views/foreground/queryClass/teacherInfo'),
+          name: 'TeacherInfo',
+          meta: {
+            title: '教师详情'
+          },
+          hidden: true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+<template>
+  <div>
+    <sign-in :is-edit="true"/>
+  </div>
+</template>
+
+<script>
+import SignIn from '../../queryClass/components/SignIn'
+export default {
+  components: {
+    SignIn
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

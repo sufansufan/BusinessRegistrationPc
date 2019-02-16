@@ -1,0 +1,8 @@
+import request from '@/utils/request'
+
+// 获取组织架构树
+export const getCampusTree = data =>
+  request({
+    url: '/a/backgroundSystem/adminOrgan/findAdminOrganTree',
+    data
+  })

@@ -1,0 +1,24 @@
+export default {
+  data() {
+    return {
+      page: 1,
+      limit: 10,
+      count: 0,
+      pageSizes: [10, 30, 50, 100],
+      pageLayout: 'total, sizes, prev, pager, next, jumper'
+    }
+  },
+  methods: {
+    handleSizeChange(val) {
+      // 公共分页每页显示条数
+      this.limit = val
+      this.page = 1
+      this.fetchData()
+    },
+    handleCurrentChange(val) {
+      // 公共分页页码事件
+      this.page = val
+      this.fetchData()
+    }
+  }
+}

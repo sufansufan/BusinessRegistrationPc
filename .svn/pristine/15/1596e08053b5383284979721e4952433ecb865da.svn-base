@@ -1,0 +1,22 @@
+import request from '@/utils/request'
+
+// 添加到购课车
+export const addCourseCart = data =>
+  request({
+    url: '/a/signUpPayFees/addAndEditCourseCart',
+    data
+  })
+
+// 获取购课车列表
+export const getCourseCartList = data =>
+  request({
+    url: '/a/signUpPayFees/findCourseCartList',
+    data
+  })
+
+// 删除购课车
+export const delCourseCart = data =>
+  request({
+    url: '/a/signUpPayFees/deleteCourseCart',
+    data
+  })

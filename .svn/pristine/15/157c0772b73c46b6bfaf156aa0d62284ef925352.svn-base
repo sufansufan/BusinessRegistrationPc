@@ -1,0 +1,175 @@
+<template>
+  <div class="add-student-box">
+    <div class="add-student-box-left">
+      <el-button icon="el-icon-arrow-left">返回</el-button>
+      <h2>基本信息</h2>
+      <el-form :model="student" label-position="top" label-width="80px" size="midium">
+        <el-form-item label="姓名">
+          <el-input v-model="student.name" style="width: 217px;" placeholder="请输入姓名"/>
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-select v-model="student.sex" placeholder="请选择性别">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="年级">
+          <el-select v-model="student.sex" placeholder="请选择年级">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="常用电话">
+          <el-input v-model="student.type" style="width: 317px;" placeholder="请输入常用电话"/>
+        </el-form-item>
+        <el-form-item label="出生日期">
+          <el-date-picker v-model="student.type" type="date" placeholder="选择日期"/>
+        </el-form-item>
+        <el-form-item label="就读学校">
+          <div class="inline">
+            <el-select v-model="student.sex" placeholder="请选择学校">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+            <el-input v-model="student.type" style="width: 250px;" placeholder="请输入内容"/>
+          </div>
+        </el-form-item>
+        <el-form-item label="科目入学成绩">
+          <el-tag
+            v-for="tag in achievement"
+            :key="tag.name"
+            closable
+          >{{ tag.label }} - {{ tag.score }}</el-tag>
+          <div class="inline">
+            <el-select
+              v-model="selectedSubject"
+              multiple
+              filterable
+              allow-create
+              default-first-option
+              placeholder="请选择科目"
+            >
+              <el-option
+                v-for="item in subject"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+            <el-input v-model="score" style="width: 100px;" placeholder="输入成绩"/>
+            <div>
+              <el-button type="primary" @click="addAchievement">添加</el-button>
+            </div>
+          </div>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="add-student-box-right">2</div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'AddStudent',
+  data() {
+    return {
+      student: {},
+      subject: [
+        {
+          value: 'a1',
+          label: '语文'
+        },
+        {
+          value: 'a2',
+          label: '数学'
+        },
+        {
+          value: 'a3',
+          label: '英语'
+        }
+      ],
+      score: '',
+      selectedSubject: [],
+      achievement: []
+    }
+  },
+  methods: {
+    addAchievement() {
+      const selectedList = this.subject.filter(item =>
+        this.selectedSubject.some(child => child === item.value)
+      ).map(item => {
+        item.score = this.score
+        return item
+      })
+      if (this.achievement.length) {
+        selectedList.forEach((item, index) => {
+          if (this.achievement.some(child => child.value === item.value)) {
+            this.$set(this.achievement[index], 'score', this.score)
+          } else {
+            this.achievement.push(item)
+          }
+          // selectedList.forEach(child => {
+          //   if (child.value === item.value) {
+          //     this.$set(this.achievement[index], 'score', this.score)
+          //   } else {
+          //     this.achievement.push(child)
+          //   }
+          // })
+        })
+      } else {
+        this.achievement.push(...selectedList)
+      }
+    }
+  }
+}
+</script>
+<style lang="scss">
+.add-student-box {
+  .el-form-item {
+    margin-bottom: 15px !important;
+    .el-form-item__label {
+      line-height: 28px;
+      padding: 0 !important;
+      color: #000;
+    }
+  }
+}
+</style>
+<style lang="scss" scoped>
+.add-student-box {
+  display: flex;
+  justify-content: space-between;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 22px;
+    height: calc(100% + 22px);
+    background: linear-gradient(to right, #f2f4f6, #f3f5f7, #f2f4f6);
+    margin-left: -11px;
+  }
+  &-left,
+  &-right {
+    width: calc(50% - 33px);
+  }
+  .inline {
+    display: flex;
+    > div:not(:first-child) {
+      margin-left: 10px;
+    }
+  }
+}
+</style>

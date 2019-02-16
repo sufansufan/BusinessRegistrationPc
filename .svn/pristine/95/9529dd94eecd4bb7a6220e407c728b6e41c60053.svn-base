@@ -1,0 +1,11 @@
+import EleMultiCascader from '@/components/EleMultiCascader'
+import CountNum from '@/components/CountNum'
+
+const MyPlugin = {}
+
+MyPlugin.install = function(Vue) {
+  Vue.component(EleMultiCascader.name, EleMultiCascader)
+  Vue.component(CountNum.name, CountNum)
+}
+
+export default MyPlugin

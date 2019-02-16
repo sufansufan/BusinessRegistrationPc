@@ -1,0 +1,8 @@
+import request from '@/utils/request'
+
+// 获取签到管理列表
+export const findAttendClassList = data =>
+  request({
+    url: '/a/class/attendClass/findAttendClassList',
+    data
+  })

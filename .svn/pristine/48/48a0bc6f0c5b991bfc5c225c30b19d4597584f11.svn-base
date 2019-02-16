@@ -1,0 +1,283 @@
+<template>
+  <div class="add-teacher-box">
+    <div class="add-teacher-box-left">
+      <div class="go-back">
+        <el-button type="goback" icon="el-icon-arrow-left" @click="$router.go(-1)">返回</el-button>
+      </div>
+      <h2 class="title">基本信息</h2>
+      <el-form :model="teacher" label-position="top" label-width="80px" size="midium">
+        <el-form-item>
+          <el-upload
+            :show-file-list="false"
+            class="teacher-uploader"
+            action="https://jsonplaceholder.typicode.com/posts/">
+            <img v-if="imageUrl" :src="imageUrl" class="teacher-bg">
+            <img v-else src="@/assets/images/teacher-uploader-bg.png" class="teacher-bg">
+          </el-upload>
+        </el-form-item>
+        <div class="teacher-basic-info">
+          <el-form-item label="姓名">
+            <el-input v-model="teacher.name" placeholder="请输入姓名"/>
+          </el-form-item>
+          <el-form-item label="昵称">
+            <el-input v-model="teacher.name" placeholder="请输入昵称"/>
+          </el-form-item>
+          <el-form-item label="教师编号">
+            <el-input v-model="teacher.name" placeholder="请输入教师编号"/>
+          </el-form-item>
+          <el-form-item label="电话">
+            <el-input v-model="teacher.name" placeholder="请输入电话"/>
+          </el-form-item>
+          <el-form-item label="邮箱">
+            <el-input v-model="teacher.name" placeholder="请输入邮箱"/>
+          </el-form-item>
+          <el-form-item label="所属校区">
+            <el-select v-model="teacher.sex" placeholder="请选择所属校区">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <div class="level-and-hour">
+              <strong>教师级别</strong>
+              <strong>义务课时</strong>
+            </div>
+            <div class="level-and-hour level-font" >
+              <strong>A+111</strong>
+              <strong>6</strong>
+            </div>
+          </el-form-item>
+          <el-form-item label="岗位性质">
+            <el-select v-model="teacher.sex" placeholder="请选择岗位性质">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="授课科目">
+            <el-select v-model="teacher.sex" placeholder="请选择授课科目">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="性别">
+            <el-select v-model="teacher.sex" placeholder="请选择授课科目">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="紧急联系人">
+            <el-input v-model="teacher.name" placeholder="请输入紧急联系人"/>
+          </el-form-item>
+          <el-form-item label="联系人电话">
+            <el-input v-model="teacher.name" placeholder="请输入联系人电话"/>
+          </el-form-item>
+          <el-form-item label="详细地址">
+            <el-input v-model="teacher.name" placeholder="请输入联系人电话"/>
+          </el-form-item>
+        </div>
+      </el-form>
+      <h2 class="title">更多信息</h2>
+      <el-form :model="teacher" label-position="top" label-width="80px" size="midium" class="teacher-more-info">
+        <el-form-item label="民族">
+          <el-select v-model="teacher.sex" placeholder="请选择民族">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="年龄">
+          <el-input v-model="teacher.name" placeholder="请输入年龄"/>
+        </el-form-item>
+        <el-form-item label="出生日期">
+          <el-date-picker
+            v-model="teacher.sex"
+            type="date"
+            placeholder="选择日期"/>
+        </el-form-item>
+        <el-form-item label="政治面貌">
+          <el-select v-model="teacher.sex" placeholder="请选择政治面貌">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="婚姻状况">
+          <el-select v-model="teacher.sex" placeholder="请选择婚姻状况">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="籍贯">
+          <el-input v-model="teacher.name" placeholder="请输入籍贯"/>
+        </el-form-item>
+        <el-form-item label="户口所在地">
+          <el-input v-model="teacher.name" placeholder="请输入户口所在地"/>
+        </el-form-item>
+        <el-form-item label="身份证号">
+          <el-input v-model="teacher.name" placeholder="请输入联系人电话"/>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="add-teacher-box-right">
+      <h2 class="title">教师资历</h2>
+      <el-form :model="teacher" label-position="top" label-width="80px" size="midium">
+        <div class="teacher-seniority">
+          <el-form-item label="教学年限">
+            <el-input v-model="teacher.name" placeholder="请输入教学年限"/>
+          </el-form-item>
+          <el-form-item label="毕业院校">
+            <el-input v-model="teacher.name" placeholder="请输入毕业院校"/>
+          </el-form-item>
+          <el-form-item label="专业">
+            <el-input v-model="teacher.name" placeholder="请输入专业"/>
+          </el-form-item>
+          <el-form-item label="最高学历">
+            <el-input v-model="teacher.name" placeholder="请输入最高学历"/>
+          </el-form-item>
+        </div>
+        <el-form-item label="教学简介">
+          <el-input v-model="teacher.name" :rows="7" type="textarea" placeholder="请输入教学介绍"/>
+        </el-form-item>
+        <el-form-item label="教学特点">
+          <el-input v-model="teacher.name" :rows="7" type="textarea" placeholder="请输入教学特点"/>
+        </el-form-item>
+        <el-form-item label="教学成果">
+          <el-input v-model="teacher.name" :rows="7" type="textarea" placeholder="请输入教学成果"/>
+        </el-form-item>
+        <el-form-item>
+          <div class="submit-btn">
+            <el-button type="primary" style="width: 300px;" @click="saveteacher">保存</el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      imageUrl: false,
+      teacher: {
+        name: '',
+        sex: '',
+        type: ''
+      }
+    }
+  },
+  methods: {
+    saveteacher() {
+
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.add-teacher-box{
+  display: flex;
+  justify-content: space-between;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 22px;
+    height: calc(100% + 22px);
+    background: linear-gradient(to right, #f1f1f1, #f3f5f7, #f1f1f1);
+    margin-left: -11px;
+  }
+  &-left,
+  &-right {
+    width: calc(50% - 33px);
+  }
+  .go-back {
+    position: absolute;
+  }
+  .title {
+    text-align: center;
+    margin-top: 5px;
+  }
+  .submit-btn {
+    text-align: center;
+    padding-top: 30px;
+  }
+  .teacher-uploader{
+    width: 153px;
+    height: 200px;
+    margin: 0 auto;
+    border-radius: 8px;
+    .teacher-bg{
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 8px;
+    }
+  }
+  .teacher-more-info{
+    .el-form-item:nth-of-type(7){
+      width: 100%;
+    }
+  }
+  .teacher-seniority{
+    display: flex;
+    justify-content: space-between;
+    .el-form-item{
+      width: calc(25% - 10px);
+    }
+  }
+  .teacher-basic-info, .teacher-more-info{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    .el-form-item{
+      width: calc(33.33% - 10px);
+      &:last-child{
+        width: 100%;
+      }
+      .el-input, .el-select{
+        width: 100%;
+      }
+      .level-and-hour{
+        color: #5a5e66;
+        display: flex;
+        justify-content: space-between
+      }
+      .level-font{
+        font-size: 32px;
+        & > strong:last-child{
+          margin-right: 20px;
+        }
+      }
+    }
+  }
+}
+</style>

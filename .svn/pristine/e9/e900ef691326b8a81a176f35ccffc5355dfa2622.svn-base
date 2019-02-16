@@ -1,0 +1,136 @@
+<template>
+  <div class="select-course-box">
+    <h4>
+      <span>{{ scope.row.campusName }}</span>
+      <span>{{ scope.row.className }}</span>
+      <span>{{ scope.row.periods }}期</span>
+    </h4>
+    <div class="select-course-box-list">
+      <span
+        v-show="attendList[scope.row.id] && !attendList[scope.row.id].length"
+        class="is-empty"
+      >暂无课次</span>
+      <div
+        v-for="item in attendList[scope.row.id]"
+        :key="item.id"
+        :class="{'actived': hasSelectedAttend(item.id, order[scope.$index].payAttend)}"
+        @click="selectedAttend(item.id, order[scope.$index], item.status)"
+      >
+        <span>{{ item.workdate }}</span>
+        <h1 class="act-color">{{ item.classSequence }}</h1>
+        <span
+          :class="{[item.status === '3' ? 'el-button--success' : 'no-buy'] : true}"
+        >{{ item.statusName }}</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'SelectCourse',
+  props: {
+    order: {
+      type: Array,
+      default: () => []
+    },
+    scope: {
+      type: Object,
+      default: () => { }
+    },
+    attendList: {
+      type: Object,
+      default: () => { }
+    }
+  },
+  methods: {
+    hasSelectedAttend(id, attend) {
+      return attend.some(item => item.id === id)
+    },
+    selectedAttend(id, row, status) {
+      const { classId, payAttend: attend } = row
+      console.log(row)
+
+      if (id === 'all') {
+        const selectFn = () => {
+          this.attendList[classId].forEach(item => {
+            if (item.status === '3') this.selectedAttend(item.id, row, item.status)
+          })
+        }
+        selectFn()
+        return
+      } else if (status !== '3' || !this.isEdit) return
+      const index = attend.findIndex(item => item.id === id)
+      if (index > -1) attend.splice(index, 1)
+      else attend.push({ id })
+      const ids = attend.map(item => item.id)
+      const totalPrice =
+        this.attendList[classId]
+          .filter(item => ids.includes(item.id))
+          .map(item => item.amount)
+          .reduce((s, n) => +s + +n, 0)
+      row.price = totalPrice
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.select-course-box {
+  h4 {
+    margin: 0 0 10px 0;
+    span {
+      padding-right: 10px;
+    }
+  }
+  &-list {
+    display: flex;
+    flex-wrap: wrap;
+    width: calc(100% + 10px);
+    > div {
+      width: 65px;
+      height: 65px;
+      border-radius: 6px;
+      position: relative;
+      border: 1px solid #f3f3f3;
+      box-shadow: 0 0 10px #eee;
+      background: #fff;
+      overflow: hidden;
+      margin-right: 10px;
+      position: relative;
+      &.actived {
+        background: rgba(#409167, 0.2);
+        h1,
+        span:first-child {
+          color: #409167 !important;
+        }
+      }
+      h1 {
+        margin: 16px 0 0 0;
+        text-align: center;
+      }
+      span {
+        font-size: 12px;
+        position: absolute;
+        left: 0;
+        &:first-child {
+          left: 3px;
+          top: 2px;
+          color: #aeadad;
+        }
+        &:last-child {
+          bottom: 0;
+          width: 100%;
+          text-align: center;
+          height: 14px;
+          line-height: 14px;
+          &.no-buy {
+            background: #eee;
+            color: #a5a5a5;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

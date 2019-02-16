@@ -1,0 +1,124 @@
+<template>
+  <div class="apply-box">
+    <router-view v-if="$route.matched.length > 2"/>
+    <template v-else>
+      <div class="select-tools">
+        <div>
+          <div>
+            <el-input
+              v-model="searchVal"
+              placeholder="姓名/电话"
+              @keyup.enter.native="fetchData('search')"
+            />
+          </div>
+          <div>
+            <el-button type="primary" icon="el-icon-search" @click="fetchData('search')">搜索</el-button>
+          </div>
+        </div>
+        <div class="btn">
+          <div>
+            <el-button
+              type="primary"
+              icon="el-icon-plus"
+              @click="$router.push({name: 'AddStudent'})"
+            >新增</el-button>
+          </div>
+        </div>
+      </div>
+      <el-table :data="dataList" stripe border style="width: 100%">
+        <el-table-column prop="name" label="姓名"/>
+        <el-table-column prop="no" label="学号" width="150"/>
+        <el-table-column label="性别">
+          <template slot-scope="scope">
+            <img :src="scope.row.sexImg" style="vertical-align: middle;">
+          </template>
+        </el-table-column>
+        <el-table-column prop="gradelable" label="年级"/>
+        <el-table-column prop="birthday" label="出生日期"/>
+        <el-table-column prop="oldAttendClassName" label="就读学校" width="150"/>
+        <el-table-column prop="campusName" label="校区"/>
+        <el-table-column prop="mobile" label="联系电话" width="150"/>
+        <el-table-column label="已结课/在读/已支付/总数" width="175">
+          <template slot-scope="scope">
+            <span
+              class="price-font"
+            >{{ scope.row.inSession }} / {{ scope.row.beReading }} / {{ scope.row.paid }} / {{ scope.row.sum }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="courseCounselorName" label="课程顾问"/>
+        <el-table-column label="操作" fixed="right">
+          <template slot-scope="{row}">
+            <slot :row="row">
+              <el-button
+                type="text"
+                @click="$router.push({path: '/foreground/apply/student/classQuery/' + row.id})"
+              >查看</el-button>
+            </slot>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        v-show="count"
+        :page-sizes="pageSizes"
+        :page-size="limit"
+        :total="count"
+        :current-page="page"
+        :layout="pageLayout"
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+      />
+    </template>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import { getStudentList } from '@/api/backstage/studentInfoManagement'
+import { parseTime, sexImg } from '@/utils'
+export default {
+  name: 'ApplyList',
+  mixins: [tables],
+  provide() {
+    return {
+      sid: this.$route.params.id
+    }
+  },
+  data() {
+    return {
+      dataList: [],
+      searchVal: ''
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData(type) {
+      if (type === 'search') this.page = 1
+      const params = {
+        page: this.page,
+        limit: this.limit,
+        operationType: 1,
+        userNameAndPhone: this.searchVal
+      }
+      this.BFD(getStudentList(params).then(res => {
+        const { count, list } = res.data
+        this.count = count
+        this.dataList = list.map(item => {
+          item.birthday = parseTime(item.birthday, 'y-m-d')
+          item.sexImg = sexImg(item.whetherBoy)
+          return item
+        })
+      }))
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.apply-box {
+  .price-font {
+    font-size: 16px;
+  }
+}
+</style>

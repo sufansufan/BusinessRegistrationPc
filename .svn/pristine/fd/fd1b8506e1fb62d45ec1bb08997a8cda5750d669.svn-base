@@ -1,0 +1,244 @@
+<template>
+  <div class="order-item-box">
+    <div v-for="(order, orderIndex) in orderList" :key="order.id">
+      <el-row :gutter="10" class="order-item-box-title">
+        <el-col :xs="24" :sm="24" :md="24" :lg="15">
+          <div class="order-item-box-title-left">
+            <div class="tit">
+              <span>支付分期</span>
+            </div>
+            <by-stages :by-stages="order.payAttend" v-bind="$attrs"/>
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="24" :lg="9">
+          <div class="order-item-box-title-right">
+            <div class="tit">
+              <span>总金额</span>
+              <count-num :num="order._totalPrice" prefix="￥"/>
+            </div>
+            <div class="tit">
+              <span>操作人</span>
+              <span>{{ order.updateByName }}</span>
+            </div>
+            <el-button
+              :disabled="order._payment"
+              type="primary"
+              @click="$router.push({path: '/foreground/apply/payConfirm/' + sid + '?oid=' + order.bigOrderId})"
+            >{{ order._payment? '已支付' :'支付' }}</el-button>
+            <el-button
+              v-if="isRefund"
+              :disabled="!selectedList[orderIndex].length"
+              @click="refund(orderIndex)"
+            >退费</el-button>
+            <el-button v-if="isDelete">删除</el-button>
+          </div>
+        </el-col>
+      </el-row>
+      <el-table :data="order._bigOrder" stripe border style="width: 100%">
+        <el-table-column prop="_createDate" label="时间" width="100" fixed="left"/>
+        <el-table-column prop="bigOrderId" label="订单ID" width="100" fixed="left"/>
+        <el-table-column prop="capmusName" label="校区" fixed="left"/>
+        <el-table-column
+          v-for="(item, index) in columns"
+          :key="index"
+          :width="item.width || 'auto'"
+          :label="item.label"
+          :fixed="item.fixed || false"
+        >
+          <template slot-scope="{row}">
+            <div v-for="(o, i) in row.order" :key="o.id" class="child-order-list">
+              <div v-if="item.prop === 'selection'">
+                <el-checkbox
+                  :disabled="!o.whetherRefund"
+                  v-model="multipleSelection[orderIndex][i].selected"
+                  @change="selectionChange(o, orderIndex, i)"
+                />
+              </div>
+              <div v-else-if="typeof item.prop === 'object' && o.className">
+                <span
+                  v-for="(v, index) in item.prop"
+                  :key="index"
+                >{{ o[v] }}{{ index === 0 ? '/' : '' }}</span>
+              </div>
+              <div v-else-if="item.prop === 'operation'">
+                <el-button
+                  type="text"
+                  @click="$router.push({path: `/foreground/apply/changeClass/${sid}?cid=${o.classId}&oid=${o.id}`})"
+                >转班</el-button>
+                <el-button
+                  type="text"
+                  @click="$router.push({path: `/foreground/apply/curriculumAdjust/${sid}?cid=${o.classId}`})"
+                >调课</el-button>
+                <el-button type="text">打印听课证</el-button>
+              </div>
+              <div v-else-if="!o[item.prop]" class="is-empty">N/A</div>
+              <div v-else-if="item.type">
+                <span class="price-font">{{ item.pre }}{{ o[item.prop] }}</span>
+              </div>
+              <div v-else :title="o[item.prop]">{{ o[item.prop] }}</div>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
+</template>
+
+<script>
+import ByStages from './ByStages'
+export default {
+  inject: ['sid'],
+  components: {
+    ByStages
+  },
+  props: {
+    orderList: {
+      type: Array,
+      default: () => []
+    },
+    isRefund: {
+      type: Boolean,
+      default: false
+    },
+    isDelete: {
+      type: Boolean,
+      default: false
+    },
+    isOperation: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      columns: [
+        { label: '选择', prop: 'selection', fixed: 'left' },
+        { label: '班级名称', prop: 'className', width: '200' },
+        { label: '收费内容', prop: '_otherName', width: '200' },
+        { label: '购课/总课次', prop: ['payAttendCount', 'classttendCount'], width: '100' },
+        { label: '当前校区/班级', prop: ['currentCampusName', 'currentClassName'], width: '300' },
+        { label: '折扣', prop: 'discount', type: 'num' },
+        { label: '立减', prop: 'subtractAmount', type: 'num', pre: '￥', width: '150' },
+        { label: '优惠卷', prop: 'couponName', type: 'num' },
+        { label: '单价', prop: 'singlePrice', type: 'num', pre: '￥', width: '150' },
+        { label: '数量', prop: 'number', type: 'num' },
+        { label: '应付金额', prop: 'price', type: 'num', pre: '￥', width: '150' },
+        { label: '订单金额', prop: 'realPayment', type: 'num', pre: '￥', width: '150' },
+        { label: '实付金额', prop: 'paidPayment', type: 'num', pre: '￥', width: '150' },
+        { label: '状态', prop: 'statusName' },
+        { label: '操作', prop: 'operation', width: '175', fixed: 'right' }
+      ],
+      multipleSelection: [],
+      selectedList: []
+    }
+  },
+  watch: {
+    orderList: {
+      handler() {
+        this.orderList.forEach((item, index) => {
+          if (item.payAttend.every(attend => attend.paymentStatus === '2')) {
+            item._payment = true
+          }
+          this.selectedList.push([])
+          this.multipleSelection.push([])
+          if (item.order.length) {
+            item.order.forEach((item, i) => {
+              this.$set(this.multipleSelection[index], i, {
+                selected: false,
+                value: null
+              })
+            })
+          }
+        })
+      },
+      deep: true,
+      immediate: true
+    }
+  },
+  created() {
+    if (!this.isOperation) {
+      this.columns.splice(-1, 1)
+    }
+  },
+  methods: {
+    selectionChange(row, index, i) {
+      const list = this.multipleSelection
+      const column = list[index][i]
+      column.value = null
+      if (column.selected) column.value = row
+      this.selectedList = list.map(item => item.filter(item => item.selected).map(item => item.value))
+      // this.$emit('selection-change', selectedList)
+    },
+    refund(index) {
+      const ids = this.selectedList[index].map(item => item.id).join(',')
+      this.$router.push({ path: `/foreground/apply/refund/${this.sid}?ids=${ids}` })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.order-item-box {
+  > div {
+    margin-bottom: 25px;
+    .child-order-list {
+      height: 33px;
+      line-height: 33px;
+      position: relative;
+      .is-empty {
+        font-size: 12px;
+      }
+      .price-font {
+        font-size: 16px;
+      }
+      > div {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      &:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: -10px;
+        bottom: -1px;
+        width: calc(100% + 20px);
+        height: 1px;
+        background: #eee;
+      }
+    }
+  }
+  &-title {
+    &-left {
+      display: flex;
+      .tit {
+        text-align: center;
+      }
+      .by-stages-box {
+        padding-bottom: 0;
+      }
+    }
+    &-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+    }
+    .tit {
+      margin: 0 10px 10px 0;
+      padding: 0 10px;
+      line-height: 33px;
+      background: #eaeaea;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      > span {
+        &:first-child {
+          color: #707070;
+          &:not(:only-of-type) {
+            padding-right: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

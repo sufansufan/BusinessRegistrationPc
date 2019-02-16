@@ -1,0 +1,90 @@
+<template>
+  <div class="student-tabel">
+    <router-view v-if="lastRoute"/>
+    <template v-else>
+      <slot name="select"/>
+      <comm-table :data="dataList" :columns="columns" :count="count">
+        <div slot-scope="scope">
+          <el-button type="text" @click="$router.push({ path: '/backstage/editStudent/'+ scope.row.id })">编辑</el-button>
+          <el-button type="text">删除</el-button>
+        </div>
+      </comm-table>
+      <el-pagination
+        v-show="count"
+        :page-sizes="pageSizes"
+        :page-size="limit"
+        :total="count"
+        :current-page="page"
+        :layout="pageLayout"
+        class="campus-pagination"
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+      />
+    </template>
+  </div>
+
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import CommTable from '@/views/components/CommTable'
+import { getStudentList } from '@/api/backstage/studentInfoManagement'
+import { parseTime, sexImg } from '@/utils'
+export default {
+  components: {
+    CommTable
+  },
+  mixins: [tables],
+  data() {
+    return {
+      columns: [
+        { label: '学员姓名', prop: 'name' },
+        { label: '学员编号', prop: 'no', width: '100' },
+        {
+          label: '性别',
+          width: '100',
+          prop: 'sexImg',
+          render: (h, row) => {
+            return h('img', {
+              attrs: {
+                src: row.sexImg
+              }
+            })
+          }
+        },
+        { label: '年级', prop: 'gradelable' },
+        {
+          label: '出生日期',
+          prop: 'birthday',
+          render: (h, row) => {
+            return h('div', parseTime(row.birthday, 'y-m-d'))
+          }
+        },
+        { label: '就读学校', prop: 'oldAttendClassName' },
+        { label: '所属校区', prop: 'campusName', width: '150' },
+        { label: '联系电话', prop: 'mobile' },
+        { label: '报班个数', prop: 'attendClassNumber', width: '100' },
+        { label: '操作', prop: 'operation', width: '175', fixed: 'right' }
+      ],
+      dataList: []
+    }
+  },
+  methods: {
+    fetchData(select) {
+      this.BFD(getStudentList(select).then(({ data }) => {
+        const { count, list } = data
+        this.count = count
+        this.dataList = list
+        this.dataList.map(item => {
+          item.sexImg = sexImg(item.whetherBoy)
+        })
+      }))
+    }
+
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

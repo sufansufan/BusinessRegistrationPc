@@ -1,0 +1,247 @@
+<template>
+  <div class="curriculum-adjust-box">
+    <student/>
+    <div class="curriculum-adjust-box-content">
+      <el-button type="goback" @click="$router.go(-1)">返回</el-button>
+      <h2>调课</h2>
+      <h3 class="bor-tit">
+        <span>原班信息</span>
+        <i class="act-bg"/>
+      </h3>
+      <div class="title">
+        <span>文化路</span>
+        <span>2018年暑假六年级数学思维素养A2班</span>
+        <span>1期</span>
+      </div>
+      <div class="course-list">
+        <div class="course-list-item">
+          <span class="time">06-11</span>
+          <h1 class="act-color">1</h1>
+          <span class="bottom el-alert--success">签到</span>
+        </div>
+        <div class="course-list-item">
+          <span class="time">06-11</span>
+          <h1 class="act-color">2</h1>
+          <span class="bottom el-alert--info">请假</span>
+        </div>
+        <div class="course-list-item">
+          <span class="time">06-11</span>
+          <h1 class="act-color">3</h1>
+          <span class="bottom el-alert--warning">补签</span>
+        </div>
+        <div class="course-list-item">
+          <span class="time">06-11</span>
+          <h1 class="act-color">4</h1>
+          <span class="bottom no-sign">未签</span>
+        </div>
+      </div>
+      <h3 class="bor-tit">
+        <span>目标班级</span>
+        <i class="act-bg"/>
+      </h3>
+      <template v-if="selected">
+        <div class="old-to-new">
+          <div class="arrow">
+            <i class="el-icon-d-arrow-right"/>
+            <i class="el-icon-d-arrow-right"/>
+          </div>
+          <div class="course-item">
+            <span class="time">06-11</span>
+            <h1 class="act-color">1</h1>
+            <span class="bottom el-alert--success">签到</span>
+          </div>
+          <div class="course-item">
+            <span class="time">06-11</span>
+            <h1 class="act-color">1</h1>
+            <span class="bottom el-alert--success">签到</span>
+          </div>
+        </div>
+        <div class="title">
+          <span>文化路</span>
+          <span>2018年暑假六年级数学思维素养A2班</span>
+          <span>1期</span>
+        </div>
+        <div class="course-list">
+          <div class="course-list-item">
+            <span class="time">06-11</span>
+            <h1 class="act-color">1</h1>
+            <span class="bottom el-alert--success">签到</span>
+          </div>
+          <div class="course-list-item">
+            <span class="time">06-11</span>
+            <h1 class="act-color">2</h1>
+            <span class="bottom el-alert--info">请假</span>
+          </div>
+          <div class="course-list-item">
+            <span class="time">06-11</span>
+            <h1 class="act-color">3</h1>
+            <span class="bottom el-alert--warning">补签</span>
+          </div>
+          <div class="course-list-item">
+            <span class="time">06-11</span>
+            <h1 class="act-color">4</h1>
+            <span class="bottom no-sign">未签</span>
+          </div>
+        </div>
+        <div class="btn">
+          <el-button type="primary">确认调课</el-button>
+          <el-button @click="selected = false">重新选择</el-button>
+        </div>
+      </template>
+      <template v-else>
+        <class-query :is-apply="false">
+          <template slot-scope="scope">
+            <el-button type="text" @click="selected = !selected">选择</el-button>
+          </template>
+        </class-query>
+      </template>
+    </div>
+  </div>
+</template>
+
+<script>
+import Student from '../student'
+import ClassQuery from './ClassQuery'
+export default {
+  components: {
+    Student,
+    ClassQuery
+  },
+  data() {
+    return {
+      selected: false
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.curriculum-adjust-box {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 114px;
+    width: calc(100% + 44px);
+    height: 22px;
+    background: linear-gradient(to bottom, #f1f1f1, #f3f5f7, #f1f1f1);
+  }
+  &-content {
+    padding-top: 66px;
+    .el-button--goback {
+      position: absolute;
+    }
+    > h2 {
+      margin: 0 0 22px 0;
+      text-align: center;
+    }
+    .title {
+      span {
+        padding-right: 10px;
+        color: #7d7d7d;
+      }
+    }
+    .course-list,
+    .old-to-new {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 24px 0 0 0;
+      &-item,
+      .course-item {
+        width: 87px;
+        height: 100px;
+        border: 1px solid #f5f5f5 {
+          radius: 6px;
+        }
+        text-align: center;
+        margin: 0 18px 18px 0;
+        background: #fff;
+        box-shadow: 0 0 20px #eee;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        .time {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          font-size: 12px;
+          color: #b8b8b8;
+        }
+        h1 {
+          font-size: 2.5em;
+          margin-top: 20px;
+        }
+        .bottom {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          padding: 5px 0;
+          font-weight: bold;
+          font-size: 14px;
+          &.no-sign {
+            background-color: #eee;
+            color: #bbb;
+          }
+        }
+      }
+    }
+    .old-to-new {
+      min-width: 525px;
+      justify-content: center;
+      padding-bottom: 20px;
+      position: relative;
+      .course-item {
+        width: 160px;
+        height: 173px;
+        cursor: default;
+        margin-right: 0;
+        border-radius: 8px;
+        &:not(:last-child) {
+          margin-right: 250px;
+        }
+        h1 {
+          font-size: 6em;
+          margin-top: 25px;
+        }
+      }
+      .arrow {
+        position: absolute;
+        top: 65px;
+        left: 50%;
+        display: flex;
+        transform: translateX(-50%);
+        animation: arrow 1.3s infinite;
+        animation-fill-mode: both;
+        i {
+          font-size: 5em;
+          font-weight: bold;
+          color: #cecece;
+          &:last-child {
+            margin-left: -100px;
+          }
+        }
+      }
+    }
+    .btn {
+      padding: 30px 0;
+      text-align: center;
+      > button {
+        width: 40%;
+        max-width: 180px;
+      }
+    }
+  }
+}
+@keyframes arrow {
+  from {
+    left: 45%;
+    opacity: 0;
+  }
+  to {
+    left: 53%;
+    opacity: 1;
+  }
+}
+</style>

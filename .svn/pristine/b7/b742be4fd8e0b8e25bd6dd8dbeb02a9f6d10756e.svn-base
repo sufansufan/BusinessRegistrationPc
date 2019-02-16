@@ -1,0 +1,47 @@
+// 引入地图
+import maps from 'qqmap'
+
+const TMap = function() {
+  if (!(this instanceof TMap)) return new TMap()
+  this.initMap()
+}
+TMap.prototype = {
+  initMap: function() {
+    maps.init('CKMBZ-K26RX-DSS43-Z2TTF-VWDBZ-BYFE5', () => {
+      const myLating = new maps.LatLng(39.916527, 116.397128)
+      const myOptions = {
+        zoom: 10,
+        center: myLating,
+        mapTypeId: maps.MapTypeId.ROADMAP
+      }
+      this.map = new maps.Map(document.getElementById('map-container'), myOptions)
+      this.getAddress()
+      console.log(this.getAddress())
+    })
+  },
+  getAddress: function() {
+    const geocoder = new maps.Geocoder({
+      // 设置服务请求成功的回调函数
+      complete: (result) => {
+        this.map.setCenter(result.detail.location)
+        var marker = new maps.Marker({
+          map: this.map,
+          position: result.detail.location
+        })
+        marker.setTitle('坐标地址为： ' + result.detail.location)
+        result.detail.location
+        // 点击Marker会弹出反查结果
+        /*    maps.event.addListener(marker, 'click', () => {
+          this.position = result.detail.location
+        }) */
+      },
+      // 若服务请求失败，则运行以下函数
+      error: () => {
+        alert('出错了，请输入正确的经纬度！！！')
+      }
+    })
+    geocoder.getLocation('西安')
+    return this.position
+  }
+}
+export default TMap

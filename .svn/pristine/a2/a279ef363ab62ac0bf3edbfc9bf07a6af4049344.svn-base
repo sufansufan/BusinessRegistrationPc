@@ -1,0 +1,169 @@
+<template>
+  <div class="select-course-box">
+    <h4>
+      <span>{{ scope.row.campusName }}</span>
+      <span>{{ scope.row.className }}</span>
+      <span>{{ scope.row.periods }}期</span>
+    </h4>
+    <div class="select-course-box-list">
+      <span v-show="!attend.length" class="is-empty">暂无课次</span>
+      <div
+        v-for="item in attend"
+        :key="item.id"
+        :class="{'actived': hasSelectedAttend(item.id, order[scope.$index].payAttend)}"
+        @click="selectedAttend(item.id, order[scope.$index], item.whetherRefund && item.status !== '3' || !item.whetherRefund && item.status === '3')"
+      >
+        <span>{{ item.workdate }}</span>
+        <h1 class="act-color">{{ item.classSequence }}</h1>
+        <span :class="sequenceClass(item)">{{ item.statusName || item.rollCallStatusLabel }}</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { deepClone } from '@/utils'
+export default {
+  name: 'SelectCourse',
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: false
+    },
+    isRefund: {
+      type: Boolean,
+      default: false
+    },
+    order: {
+      type: Array,
+      default: () => []
+    },
+    scope: {
+      type: Object,
+      default: () => { }
+    },
+    attendList: {
+      type: Object,
+      default: () => { }
+    }
+  },
+  data() {
+    return {
+      sequenceList: []
+    }
+  },
+  computed: {
+    sequenceClass() {
+      return item => {
+        return (item.whetherRefund || item.status === '3') ? 'el-button--success' : 'no-buy'
+      }
+    },
+    attend() {
+      const { row: { classId: refundId }, classId: payId } = this.scope
+      return this.sequenceList[payId || refundId] || []
+    }
+  },
+  watch: {
+    attendList: {
+      handler() {
+        this.sequenceList = deepClone(this.attendList)
+      },
+      deep: true,
+      immediate: true
+    }
+  },
+  methods: {
+    hasSelectedAttend(id, attend) {
+      return attend.some(item => item.id === id)
+    },
+    selectedAttend(id, row, select) {
+      const { classId, payAttend: attend } = row
+      const sequenceList = this.sequenceList[classId]
+      if (id === 'all') {
+        const selectFn = () => {
+          sequenceList.forEach(item => {
+            if (item.status === '3') this.selectedAttend(item.id, row, item.status)
+          })
+        }
+        selectFn()
+        return
+      } else if (!select || !this.isEdit) return
+      const index = attend.findIndex(item => item.id === id)
+      if (index > -1) attend.splice(index, 1)
+      else attend.push({ id })
+      const ids = attend.map(item => item.id)
+      const totalPrice = sequenceList
+        .filter(item => ids.includes(item.id))
+        .map(item => item.amount)
+        .reduce((s, n) => +s + +n, 0)
+      if (this.isRefund) {
+        row._refundPrice = totalPrice
+        row._refundNum = ids.length
+        row._refundAttendClassIds = ids.join(',')
+        return
+      }
+      row.price = totalPrice
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.select-course-box {
+  h4 {
+    margin: 0 0 10px 0;
+    span {
+      padding-right: 10px;
+    }
+  }
+  &-list {
+    display: flex;
+    flex-wrap: wrap;
+    width: calc(100% + 10px);
+    > div {
+      width: 65px;
+      height: 65px;
+      border-radius: 6px;
+      position: relative;
+      border: 1px solid #f3f3f3;
+      box-shadow: 0 0 10px #eee;
+      background: #fff;
+      overflow: hidden;
+      margin-right: 10px;
+      position: relative;
+      &.actived {
+        background: rgba(#409167, 0.2);
+        h1,
+        span:first-child {
+          color: #409167 !important;
+        }
+      }
+      h1 {
+        margin: 16px 0 0 0;
+        text-align: center;
+      }
+      span {
+        font-size: 12px;
+        position: absolute;
+        left: 0;
+        &:first-child {
+          left: 3px;
+          top: 2px;
+          color: #aeadad;
+        }
+        &:last-child {
+          bottom: 0;
+          width: 100%;
+          text-align: center;
+          height: 14px;
+          line-height: 14px;
+          &.no-buy {
+            background: #eee;
+            color: #a5a5a5;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

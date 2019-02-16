@@ -1,0 +1,89 @@
+<template>
+  <div class="order-group-box">
+    <span v-show="!count" class="is-empty">暂无订单</span>
+    <el-pagination
+      v-show="count && count > 3"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <order-item v-loading="loading" ref="orderItem" :order-list="orderList" v-bind="$attrs"/>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import { getOrderList } from '@/api/foreground/apply'
+import { parseTime } from '@/utils'
+import OrderItem from './OrderItem'
+export default {
+  components: {
+    OrderItem
+  },
+  mixins: [tables],
+  props: {
+    type: {
+      type: Number,
+      default: 1
+    }
+  },
+  inject: ['sid'],
+  data() {
+    return {
+      orderList: []
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      this.BFD(getOrderList({
+        page: this.page,
+        limit: this.limit,
+        studentId: this.sid,
+        operationType: this.type
+      }).then(res => {
+        const { count, list } = res.data
+        this.count = count
+        this.orderList = list.map(item => {
+          const { bigOrderId, capmusName, createDate } = item
+          item._totalPrice = item.payAttend
+            .map(item => (+item.realPayment + +item.otherRealPayment))
+            .reduce((s, n) => +s + +n, 0)
+          item._bigOrder = [{
+            bigOrderId,
+            capmusName,
+            _createDate: parseTime(createDate, 'y-m-d'),
+            order: item.order.map(item => {
+              const name = item.className
+              if (item.signuporderType === '1') {
+                item._otherName = ''
+              } else {
+                item._otherName = name
+                item.className = ''
+              }
+              return item
+            })
+          }]
+          return item
+        })
+      }))
+    }
+  }
+}
+</script>

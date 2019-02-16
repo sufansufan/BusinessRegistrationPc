@@ -1,0 +1,109 @@
+<template>
+  <div class="tabs-income-box">
+    <comm-table v-loading="loading" :data="dataList" :columns="columns"/>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import { getClassIncomeList } from '@/api/foreground/queryClass'
+import { parseTime } from '@/utils'
+export default {
+  mixins: [tables],
+  data() {
+    return {
+      dataList: [],
+      columns: [
+        { label: '序号', index: true, width: 50, fixed: 'left' },
+        { label: '订单ID', prop: 'orderno', fixed: 'left', width: 140 },
+        { label: '学员姓名', prop: 'studentName', fixed: 'left' },
+        {
+          label: '订单状态',
+          prop: 'orderstatusName',
+          fixed: 'right',
+          render: (h, row) => {
+            return this.renderStateTag(row.orderstatusName, true)
+          }
+        },
+        { label: '课次单价', prop: 'singlePrice', type: 'num', pre: '￥', fixed: 'right' },
+        { label: '实付金额', prop: 'realPayment', type: 'num', pre: '￥', fixed: 'right' },
+        { label: '确认金额', prop: 'confirmAmount', type: 'num', pre: '￥', fixed: 'right' },
+        { label: '剩余金额', prop: 'leftAmount', type: 'num', pre: '￥', fixed: 'right' },
+        { label: '实退金额', prop: 'refundAmount', type: 'num', pre: '￥', fixed: 'right' }
+      ]
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      this.BFD(getClassIncomeList({ classId: this.$route.params.id }).then(res => {
+        const { attendClasses = [], signuporders } = res.data
+        this.columns.splice(3, 0, ...attendClasses.map(item => {
+          return {
+            width: 100,
+            renderHeader: h => {
+              return h('div', { class: 'income-title' }, [
+                h('span', '课次' + item.classSequence),
+                h('span', parseTime(item.workdate, 'y-m-d'))
+              ])
+            },
+            render: (h, row, index) => {
+              const column = row.stuAttendClassList[index]
+              return column && h('div', { class: 'sequence-box' }, [
+                this.renderStateTag(column.studentAttendClassTypeName, true),
+                this.renderStateTag(column.rollCallStatusName, true)
+              ])
+            }
+          }
+        }))
+        this.dataList = signuporders
+      }))
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.tabs-income-box {
+  .income-title {
+    padding: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    span {
+      display: block;
+      line-height: 16px;
+      &:last-child {
+        font-size: 12px;
+        color: #999;
+      }
+    }
+  }
+  .sequence-box {
+    span {
+      position: absolute;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      border-radius: 0;
+      border: 0;
+      &:first-child {
+        left: 0;
+        width: 30px;
+        padding: 0;
+        white-space: initial;
+        line-height: initial;
+      }
+      &:last-child {
+        margin-left: 28px;
+        left: 2px;
+        width: calc(100% - 32px);
+      }
+    }
+  }
+}
+</style>

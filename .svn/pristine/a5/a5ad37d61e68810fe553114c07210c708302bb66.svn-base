@@ -1,0 +1,353 @@
+<template>
+  <div class="refund-box">
+    <student :sid="sid"/>
+    <div class="refund-box-content">
+      <el-button type="goback" @click="$router.go(-1)">返回</el-button>
+      <h2>退费</h2>
+      <comm-table :data="order" :columns="orderColumns" :expand-list="expandList"/>
+      <h3>收费项</h3>
+      <comm-table :data="otherOrder" :columns="otherOrderColumns"/>
+      <h3>退费信息</h3>
+      <div class="refund-box-content-info">
+        <div class="refund-box-content-info-left">
+          <slot name="refundInfo"/>
+        </div>
+        <div class="refund-box-content-info-right">
+          <div>
+            <h4>课程退费合计</h4>
+            <count-num :num="totalOrderPrice" prefix="￥"/>
+          </div>
+          <div>
+            <h4>其他退费合计</h4>
+            <count-num :num="totalOtherPrice" prefix="￥"/>
+          </div>
+          <div>
+            <h3>退费总计</h3>
+            <count-num :num="totalAmountPrice" :size="24" prefix="￥"/>
+          </div>
+          <div class="btn">
+            <slot name="refundBtn"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import Student from '../student'
+import SelectCourse from './SelectCourse'
+export default {
+  inject: ['sid'],
+  components: {
+    Student,
+    SelectCourse
+  },
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: false
+    },
+    order: {
+      type: Array,
+      default: () => []
+    },
+    otherOrder: {
+      type: Array,
+      default: () => []
+    },
+    attendList: {
+      type: Array,
+      default: () => []
+    }
+  },
+  data() {
+    return {
+      expandList: [],
+      orderColumns: [
+        { label: '班级名称', prop: 'className' },
+        { label: '购课/总课节', prop: ['payAttendCount', 'totalTimes'], type: 'num' },
+        { label: '应付金额', prop: 'price', pre: '￥', type: 'num' },
+        {
+          label: '折扣',
+          render: (h, row) => {
+            return h('div', [
+              h('span', { class: 'price-font' }, row.discount),
+              h('div', row.discountReason || '无')
+            ])
+          }
+        },
+        {
+          label: '立减',
+          render: (h, row) => {
+            return h('div', [
+              h('span', { class: 'price-font' }, '￥' + row.subtractAmount),
+              h('div', row.subtractReason || '无')
+            ])
+          }
+        },
+        { label: '实付金额', prop: 'realPayment', pre: '￥', type: 'num' },
+        {
+          label: '课节单价',
+          render: (h, row) => {
+            return h('span', { class: 'price-font' }, '￥' + row.payAttend[0].amount)
+          }
+        },
+        {
+          label: '退费课次数',
+          render: (h, row, index) => {
+            return h('span', {
+              attrs: {
+                class: 'act-color price-font pointer'
+              },
+              on: {
+                click: () => this.openAttend(row.id || row.classId)
+              }
+            }, row._refundNum)
+          }
+        },
+        {
+          type: 'expand',
+          width: 1,
+          className: 'hidden',
+          render: (h, row, index) => {
+            return h(SelectCourse, {
+              props: {
+                scope: { row, $index: index },
+                isEdit: this.isEdit,
+                isRefund: true,
+                order: this.order,
+                attendList: this.attendList[index]
+              }
+            })
+          }
+        },
+        {
+          label: '课节退费',
+          width: 150,
+          render: (h, row, index) => {
+            return h('count-num', {
+              props: {
+                num: row._refundPrice,
+                prefix: '￥'
+              }
+            })
+          }
+        },
+        {
+          label: '额外退费',
+          render: (h, row) => {
+            let otherRefund = []
+            if (this.isEdit) {
+              otherRefund = [
+                h('el-input-number', {
+                  model: {
+                    value: row._otherRefundAmount,
+                    callback: val => {
+                      this.$set(row, '_otherRefundAmount', val)
+                    }
+                  },
+                  attrs: {
+                    min: 0,
+                    'controls-position': 'right'
+                  },
+                  style: {
+                    width: '100px'
+                  }
+                }),
+                h('el-input', {
+                  model: {
+                    value: row._otherRefundRemark,
+                    callback: val => {
+                      this.$set(row, '_otherRefundRemark', val)
+                    }
+                  },
+                  style: {
+                    marginTop: '7px'
+                  }
+                }, row._otherRefundRemark)
+              ]
+            } else {
+              otherRefund = [
+                h('count-num', {
+                  props: {
+                    num: row._otherRefundAmount,
+                    prefix: '￥'
+                  }
+                }),
+                h('div', row._otherRefundRemark || '无')
+              ]
+            }
+            return h('div', {
+              style: {
+                textAlign: 'left'
+              }
+            }, otherRefund)
+          }
+        },
+        {
+          label: '退费总额',
+          width: 150,
+          render: (h, row, index) => {
+            row._totalAmountPrice = row._refundPrice + row._otherRefundAmount
+            return h('count-num', {
+              props: {
+                num: row._totalAmountPrice,
+                prefix: '￥'
+              }
+            })
+          }
+        }
+      ],
+      otherOrderColumns: [
+        { label: '收费项目', prop: 'otherName' },
+        { label: '数量', prop: 'number', type: 'num' },
+        { label: '单价', prop: 'singlePrice', pre: '￥', type: 'num' },
+        { label: '应付金额', prop: 'price', pre: '￥', type: 'num' },
+        { label: '实付金额', prop: 'realPayment', pre: '￥', type: 'num' },
+        {
+          label: '退费数量',
+          render: (h, row) => {
+            this.$set(row, '_number', row.number)
+            return h('el-input-number', {
+              model: {
+                value: row.number,
+                callback: val => {
+                  this.$set(row, 'number', val)
+                }
+              },
+              attrs: {
+                min: 1,
+                max: row._number,
+                'controls-position': 'right'
+              }
+            })
+          }
+        },
+        {
+          label: '退费总额',
+          render: (h, row) => {
+            this.$set(row, '_refundOtherPrice', row._number * row.singlePrice)
+            return h('count-num', {
+              props: {
+                num: row._refundOtherPrice
+              },
+              attrs: {
+                prefix: '￥'
+              }
+            })
+          }
+        }
+      ],
+      refundForm: {
+        refundPayType: '1',
+        bankCardPayee: '',
+        bankName: '',
+        bankcardNo: '',
+        refundReason: '',
+        refundRemark: ''
+      },
+      refundReaonType: '',
+      refundReson: '',
+      rules: {
+        refundPayType: [{ required: true, message: '请选择退费方式' }],
+        bankCardPayee: [{ required: true, message: '请填写姓名' }],
+        bankName: [{ required: true, message: '请填写银行名称' }],
+        bankcardNo: [{ required: true, message: '请填写银行卡号' }],
+        refundReason: [{ required: true, message: '请选择退费类型和原因' }]
+      }
+    }
+  },
+  computed: {
+    totalOrderPrice() {
+      return this.order.map(item => item._totalAmountPrice).reduce((s, n) => +s + +n, 0)
+    },
+    totalOtherPrice() {
+      return this.otherOrder.map(item => item._refundOtherPrice).reduce((s, n) => +s + +n, 0)
+    },
+    totalAmountPrice() {
+      return this.totalOrderPrice + this.totalOtherPrice
+    }
+  },
+  methods: {
+    openAttend(classId, isExpand = true) {
+      if (isExpand) {
+        const list = this.expandList
+        const index = list.findIndex(item => item === classId)
+        if (index > -1) {
+          list.splice(index, 1)
+        } else {
+          list.push(classId)
+        }
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.refund-box {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 114px;
+    width: calc(100% + 44px);
+    height: 22px;
+    background: linear-gradient(to bottom, #f1f1f1, #f3f5f7, #f1f1f1);
+  }
+  &-content {
+    padding-top: 66px;
+    .el-button--goback {
+      position: absolute;
+    }
+    > h2 {
+      margin: 0 0 22px 0;
+      text-align: center;
+    }
+    .hidden i {
+      display: none;
+    }
+    &-info {
+      display: flex;
+      justify-content: space-between;
+      &-left {
+        width: 600px;
+        input {
+          width: 200px !important;
+        }
+        .el-form-item:last-child input {
+          width: 494px !important;
+        }
+        .reason {
+          input {
+            width: 245px !important;
+          }
+        }
+      }
+      &-right {
+        width: 400px;
+        > div {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          h4 {
+            margin: 10px 0;
+          }
+          &:nth-child(3) {
+            margin-top: 15px;
+            border-top: 1px solid #000;
+          }
+          &.btn {
+            justify-content: center;
+            button {
+              flex: 1;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>

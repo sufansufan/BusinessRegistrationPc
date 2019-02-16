@@ -1,0 +1,239 @@
+<template>
+  <div class="course-arrange-law-box">
+    <div class="select-tools">
+      <div>
+        <div>
+          <el-input v-model="select.name" placeholder="课程安排规律" style="width: 300px"/>
+        </div>
+        <div>
+          <el-select v-model="select.sex" placeholder="校区">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+      </div>
+      <div class="btn">
+        <div>
+          <el-button type="primary" icon="el-icon-search">搜索</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-refresh">重置搜索条件</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-plus" @click="modify('add')">新增</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table :data="dataList" stripe border style="width: 100%">
+      <el-table-column prop="date" label="校区"/>
+      <el-table-column prop="name" label="安排规律名称" width="150"/>
+      <el-table-column prop="address" label="课次数"/>
+      <el-table-column prop="address" label="开课日期"/>
+      <el-table-column prop="address" label="结课日期"/>
+      <el-table-column prop="address" label="重复周期"/>
+      <el-table-column prop="address" label="状态"/>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button type="text" @click="modify('edit', scope.row)">编辑</el-button>
+          <el-button type="text">删除</el-button>
+          <el-button type="text">停用</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      class="campus-pagination"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <Dialog ref="dialog" width="50%">
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form ref="arrangeLawForm" :model="arrangeLawForm" label-position="top" class="arrange-law-form">
+            <el-form-item label="规律名称">
+              <el-input v-model="arrangeLawForm.name" placeholder="请输入规律名称"/>
+            </el-form-item>
+            <el-form-item label="课次数">
+              <el-input v-model="arrangeLawForm.no" placeholder="请输入课次数"/>
+            </el-form-item>
+            <el-form-item label="开课日期">
+              <el-date-picker
+                v-model="arrangeLawForm.name"
+                style="width: 100%"
+                type="date"
+                placeholder="选择日期"/>
+            </el-form-item>
+            <el-form-item label="结课日期">
+              <span>2019年1月25日</span>
+            </el-form-item>
+            <el-form-item label="选择组织架构">
+              <el-select v-model="arrangeLawForm.no" placeholder="校区" style="width: 100%">
+                <el-option
+                  v-for="item in []"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </el-col>
+        <el-col :span="16" class="line">
+          <el-form ref="arrangeLawForm" :model="arrangeLawForm" label-position="top" class="arrange-law-form">
+            <el-form-item label="重复周期">
+              <div>
+                <el-checkbox-group v-model="arrangeLawForm.checkboxGroup">
+                  <el-checkbox-button v-for="item in weekList" :label="item" :key="item">{{ item }}</el-checkbox-button>
+                </el-checkbox-group>
+              </div>
+            </el-form-item>
+            <el-form-item label="间隔">
+              <div class="interval-list">
+                <div>
+                  <el-radio-group v-model="arrangeLawForm.intervalGroup">
+                    <el-radio-button v-for="item in intervalList" :label="item" :key="item">{{ item }}</el-radio-button>
+                  </el-radio-group>
+                </div>
+                <div>
+                  <el-button type="primary">生成日期安排规律</el-button>
+                </div>
+              </div>
+            </el-form-item>
+            <el-form-item label="日期列表">
+              <div v-for="(item, index) in arrangeLawForm.dateList" :key="index" class="date-box">
+                <span class="act-color">{{ index + 1 }}</span>
+                <el-date-picker
+                  v-model="item.date"
+                  style="width: 95%"
+                  type="date"
+                  placeholder="选择日期"/>
+                <i class="el-icon-delete act-color" @click="delteData(index)"/>
+              </div>
+              <div class="date-add" >
+                <span @click="addDate">
+                  <i class="el-icon-plus act-color"/>
+                  <span class="act-color">添加日期</span>
+                </span>
+              </div>
+            </el-form-item>
+          </el-form>
+        </el-col>
+      </el-row>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="warning" size="big">全部清空</el-button>
+        <el-button type="primary" size="big">确 定</el-button>
+        <el-button size="big" @click="$refs.dialog.show = false">取 消</el-button>
+      </span>
+    </Dialog>
+  </div>
+</template>
+
+<script>
+import tables from '@/mixin/tables'
+import Dialog from '@/components/Dialog'
+export default {
+  components: {
+    Dialog
+  },
+  mixins: [tables],
+  data() {
+    return {
+      select: {
+
+      },
+      weekList: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      intervalList: ['一周', '两周', '三周', '四周'],
+      arrangeLawForm: {
+        name: '',
+        no: '',
+        checkboxGroup: [],
+        intervalGroup: [],
+        dateList: [{
+          date: ''
+        }]
+      },
+      dataList: [{
+        address: '3123123'
+      }]
+    }
+  },
+  methods: {
+    modify(type) {
+      if (type === 'edit') {
+        this.$refs.dialog.setTitle('编辑规律')
+      } else {
+        this.$refs.dialog.setTitle('新增规律')
+      }
+      this.$refs.dialog.show = true
+    },
+    addDate() {
+      this.arrangeLawForm.dateList.push({
+        date: ''
+      })
+    },
+    delteData(index) {
+      this.arrangeLawForm.dateList.splice(index, 1)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.course-arrange-law-box{
+  .arrange-law-form{
+    .interval-list{
+      display: flex;
+      justify-content: space-between;
+    }
+    .date-box{
+      display: flex;
+      margin-bottom: 10px;
+      & > span{
+        margin-right: 20px;
+      }
+      & > i, & > span {
+        width: 38px;
+        height: 32px;
+        text-align: center;
+        border-radius: 48%;
+        font-size: 16px;
+        line-height: 32px;
+        background: #f2f2f2;
+      }
+      & > i {
+        margin-left: 20px;
+        cursor: pointer;
+      }
+    }
+    .date-add{
+      margin-top: 20px;
+      font-size: 16px;
+      & > span {
+        cursor: pointer;
+        & > i {
+          width: 32px;
+          height: 32px;
+          text-align: center;
+          border-radius: 50%;
+          font-size: 16px;
+          line-height: 32px;
+          background: #f2f2f2;
+        }
+      }
+    }
+  }
+  .line{
+    border-left: 1px solid #d8dce5;
+    min-height: 415px
+  }
+}
+</style>

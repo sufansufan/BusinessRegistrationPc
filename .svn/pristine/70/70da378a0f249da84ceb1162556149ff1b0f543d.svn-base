@@ -1,0 +1,124 @@
+<template>
+  <div class="class-arrangement">
+    <h3>课节安排(当前共7节 总课次额定 13节)</h3>
+    <div class="class-list-box">
+      <div v-for="(item ,index) in classTimeList" :key="index" class="class-list-container">
+        <el-row :gutter="20">
+          <el-col :span="1">
+            <div class="class-icon act-color">
+              {{ index + 1 }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <el-date-picker
+              v-model="item.date"
+              style="width: 100%"
+              type="date"
+              placeholder="选择日期"/>
+          </el-col>
+          <el-col :span="5">
+            <el-select v-model="item.no" placeholder="时段" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="item.teacher" placeholder="教师" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="item.classRoom" placeholder="教室" style="width: 100%">
+              <el-option
+                v-for="item in []"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-col>
+          <el-col :span="1">
+            <div class="class-icon" @click="classTime('delete', index)">
+              <i class="el-icon-delete act-color"/>
+            </div>
+          </el-col>
+        </el-row>
+      </div>
+      <div class="class-time-add act-color" @click="classTime('add')">
+        <div class="class-icon">
+          <i class="el-icon-plus"/>
+        </div>
+        <div>
+          添加课节
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      classTimeList: [{
+        teacher: '',
+        classRoom: '',
+        date: ''
+      }]
+    }
+  },
+  methods: {
+    classTime(type, index) {
+      if (type === 'add') {
+        this.classTimeList.push({
+          teacher: '',
+          classRoom: '',
+          date: ''
+        })
+      } else if (type === 'delete') {
+        this.classTimeList.splice(index, 1)
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.class-arrangement{
+  .class-list-box{
+    min-height: 500px;
+    .class-list-container{
+      margin-bottom: 10px;
+    }
+    .class-icon{
+      width: 32px;
+      height: 32px;
+      background: #f2f2f2;
+      border-radius: 50%;
+      line-height: 32px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .class-time-add{
+      width: 120px;
+      margin-top: 20px;
+      display: flex;
+      line-height: 32px;
+      cursor: pointer;
+      & > div:last-child{
+        margin-left: 10px;
+      }
+    }
+  }
+}
+</style>

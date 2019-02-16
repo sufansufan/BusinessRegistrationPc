@@ -1,0 +1,236 @@
+<template>
+  <div class="batch-setting-box">
+    <class-datail>
+      <div slot="batchSetting" class="setting">
+        <div class="setting-left">
+          <div class="go-back">
+            <el-button type="goback" icon="el-icon-arrow-left" @click="$router.go(-1)">返回</el-button>
+          </div>
+          <h2 class="title">课次信息</h2>
+          <div class="times-arrange-info">
+            <h3>课节安排（总课次额定 13节）</h3>
+            <div v-for="(item, index) in timesArrangeList" :key="index">
+              <el-row :gutter="20">
+                <el-col :span="2">
+                  <div class="num act-color">
+                    {{ index + 1 }}
+                  </div>
+                </el-col>
+                <el-col :span="11">
+                  <el-date-picker
+                    v-model="item.date"
+                    style="width: 100%"
+                    type="date"
+                    placeholder="选择日期"/>
+                </el-col>
+                <el-col :span="11">
+                  <el-select v-model="item.no" placeholder="时段" style="width: 100%">
+                    <el-option
+                      v-for="item in []"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-col>
+              </el-row>
+            </div>
+          </div>
+          <div class="submit-btn">
+            <el-button type="primary" style="width: 300px;" size="big">保存</el-button>
+          </div>
+        </div>
+        <div class="setting-right">
+          <h2 class="title">班级属性</h2>
+          <div>
+            <el-form ref="classAttribute" :model="classAttribute" label-position="top" label-width="80px" size="midium" class="class-attribute">
+              <el-form-item label="期别">
+                <el-select v-model="classAttribute.sex" placeholder="请选择期别">
+                  <el-option
+                    v-for="item in []"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="重复周期">
+                <el-select v-model="classAttribute.sex" placeholder="请选择重复周期">
+                  <el-option
+                    v-for="item in []"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="课程安排规律">
+                <div class="class-search">
+                  <el-input v-model="classAttribute.no" placeholder="请输入课程安排规律" class="input-with-select">
+                    <el-select slot="prepend" v-model="classAttribute.campus" placeholder="请选择校区">
+                      <el-option label="餐厅名" value="1"/>
+                      <el-option label="订单号" value="2"/>
+                      <el-option label="用户电话" value="3"/>
+                    </el-select>
+                  </el-input>
+                </div>
+              </el-form-item>
+              <el-form-item label="转班条件">
+                <el-select v-model="classAttribute.sex" placeholder="请选择转班条件">
+                  <el-option
+                    v-for="item in []"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="班型">
+                <el-select v-model="classAttribute.sex" placeholder="请选择班型">
+                  <el-option
+                    v-for="item in []"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="其他选项">
+                <div class="class-checkbox">
+                  <div>
+                    <el-checkbox-button v-model="classAttribute.app" label="APP显示" style="width: 100%">APP显示</el-checkbox-button>
+                  </div>
+                  <div>
+                    <el-checkbox-button v-model="classAttribute.app" label="代收费" style="width: 100%">代收费</el-checkbox-button>
+                  </div>
+                  <div>
+                    <el-checkbox-button v-model="classAttribute.app" label="代收费" style="width: 100%">入学测试</el-checkbox-button>
+                  </div>
+                  <div>
+                    <el-checkbox-button v-model="classAttribute.app" label="代收费" style="width: 100%">热门班级</el-checkbox-button>
+                  </div>
+                  <div>
+                    <el-checkbox-button v-model="classAttribute.app" label="代收费" style="width: 100%">允许旁听</el-checkbox-button>
+                  </div>
+                  <div>
+                    <el-checkbox-button v-model="classAttribute.app" label="代收费" style="width: 100%">仅后台可见</el-checkbox-button>
+                  </div>
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <div class="submit-btn">
+                  <el-button type="primary" style="width: 300px;" size="big">保存</el-button>
+                </div>
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </div>
+    </class-datail>
+  </div>
+</template>
+
+<script>
+import ClassDatail from './components/ClassDatail'
+export default {
+  name: 'BatchSetting',
+  components: {
+    ClassDatail
+  },
+  data() {
+    return {
+      timesArrangeList: [{
+
+      }],
+      classAttribute: {
+        sex: ''
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.batch-setting-box{
+  .setting{
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    min-height: 626px;
+      &::after {
+      content: "";
+      position: absolute;
+      top: -22px;
+      left: 60%;
+      width: 22px;
+      height: calc(100% + 45px);
+      background: linear-gradient(to right, #f1f1f1, #f3f5f7, #f1f1f1);
+      margin-left: -11px;
+    }
+    &-right{
+      width: calc(40% - 33px);
+      .class-attribute{
+        .el-form-item{
+          .el-select{
+            width: 100%;
+          }
+          .class-checkbox{
+             width: 100%;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            & > div{
+              width: calc(50% - 11px);
+              margin-bottom: 20px;
+            }
+          }
+        }
+      }
+    }
+    &-left{
+      width: calc(60% - 33px);
+      .times-arrange-info{
+        min-height: 758px;
+        .num{
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          text-align: center;
+          line-height: 32px;
+          background: #f2f2f2;
+          margin: 0 auto;
+        }
+      }
+    }
+    .go-back {
+      position: absolute;
+    }
+    .title {
+      text-align: center;
+      margin-top: 5px;
+    }
+    .submit-btn {
+      text-align: center;
+      padding-top: 30px;
+    }
+  }
+}
+</style>
+<style lang="scss">
+.batch-setting-box{
+  .el-checkbox-button:last-child .el-checkbox-button__inner{
+    border-radius: 4px;
+    width: 100%;
+  }
+  .class-search{
+    .el-select{
+      width: 120% !important
+    }
+    .input-with-select .el-input-group__prepend {
+      background-color: #fff;
+      width: 40%;
+    }
+  }
+}
+
+</style>

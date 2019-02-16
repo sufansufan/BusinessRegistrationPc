@@ -1,0 +1,86 @@
+<template>
+  <div class="student-select">
+    <div slot="select" class="select-tools">
+      <div>
+        <div>
+          <el-input v-model="select.no" placeholder="学员姓名/联系电话"/>
+        </div>
+        <div>
+          <el-input v-model="select.no" placeholder="学院编号"/>
+        </div>
+        <div>
+          <el-input v-model="select.no" placeholder="就读学校"/>
+        </div>
+        <div>
+          <el-select v-model="select.sex" placeholder="所属校区">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.sex" placeholder="了解渠道">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.sex" placeholder="性别">
+            <el-option
+              v-for="item in []"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-input v-model="select.no" placeholder="身份证号"/>
+        </div>
+        <div>
+          <el-input v-model="select.no" placeholder="身份证号"/>
+        </div>
+        <div>
+          <el-date-picker
+            v-model="select.date"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"/>
+        </div>
+      </div>
+      <div class="btn">
+        <div>
+          <el-button type="primary" icon="el-icon-search">搜索</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-refresh">重置搜索条件</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-download">导出</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      select: {}
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

@@ -1,0 +1,66 @@
+<template>
+  <div class="campus-select">
+    <div class="select-tools">
+      <div>
+        <div>
+          <h2 class="campus-num">校区总数 <span class="act-color">{{ adminOrganCount }}</span></h2>
+        </div>
+        <div>
+          <h2 class="campus-num">财务主体总数 <span class="act-color">{{ financeBodyCount }}</span></h2>
+        </div>
+      </div>
+      <div class="btn">
+        <div>
+          <el-select v-model="select.adminOrganStatus" placeholder="状态" clearable>
+            <el-option :value="true" label="启用"/>
+            <el-option :value="false" label="停用"/>
+          </el-select>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-search" @click="searchCampus">搜索</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-download">导出</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { getOrganFinanceCount } from '@/api/backstage/campusManagement'
+export default {
+  data() {
+    return {
+      select: {
+        adminOrganStatus: ''
+      },
+      adminOrganCount: '',
+      financeBodyCount: ''
+    }
+  },
+  created() {
+    getOrganFinanceCount({}).then(({ data }) => {
+      const { adminOrganCount, financeBodyCount } = data
+      this.adminOrganCount = adminOrganCount
+      this.financeBodyCount = financeBodyCount
+    })
+  },
+  methods: {
+    searchCampus() {
+      this.$emit('search', this.select.adminOrganStatus)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.campus-select{
+  .select-tools{
+    border-bottom: 1px solid #f0f0f0;
+    .campus-num{
+      margin: 0px;
+    }
+  }
+}
+</style>

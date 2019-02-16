@@ -1,0 +1,178 @@
+<template>
+  <div class="table-box">
+    <el-table :data="data" stripe border style="width: 100%">
+      <template
+        v-for="({label, prop, width, fixed, type, child, pre, suf, _child}, index) in tableRow"
+      >
+        <el-table-column
+          v-if="!_child && !type && !pre && !suf && prop !== 'operation'"
+          :key="index"
+          :prop="prop"
+          :label="label"
+          :width="width || 'auto'"
+          :fixed="fixed || false"
+        />
+        <el-table-column
+          v-else
+          :key="index"
+          :width="width || 'auto'"
+          :label="label"
+          :fixed="fixed || false"
+        >
+          <template slot-scope="{row}">
+            <template v-if="!_child">
+              <template v-if="prop === 'operation'">
+                <slot :row="row"/>
+              </template>
+              <template v-else-if="type === 'num'">
+                <span class="price-font">{{ pre }}{{ row[prop] || 0 }}{{ suf }}</span>
+              </template>
+              <template v-else>
+                <span>{{ pre }}{{ row[prop] }}{{ suf }}</span>
+              </template>
+            </template>
+            <template v-else>
+              <div v-for="child in row[childType]" :key="child.id" class="child-list">
+                <div v-if="prop === 'selection'">
+                  <el-checkbox/>
+                </div>
+                <div v-else-if="prop === 'operation'">
+                  <slot :row="row"/>
+                </div>
+                <div v-else-if="!child[prop]" class="is-empty">N/A</div>
+                <div v-else-if="typeof prop === 'object'">
+                  <span
+                    v-for="(v, index) in prop"
+                    :key="index"
+                  >{{ child[v] }}{{ index !== prop.length - 1 ? '/' : '' }}</span>
+                </div>
+                <div v-else-if="type">
+                  <span class="price-font">{{ pre }}{{ child[prop] }}{{ suf }}</span>
+                </div>
+                <div v-else :title="child[prop]">{{ child[prop] }}</div>
+              </div>
+            </template>
+          </template>
+        </el-table-column>
+      </template>
+    </el-table>
+    <el-pagination
+      v-show="count && paging"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+  </div>
+</template>
+
+<script>
+import pagination from '@/mixin/pagination'
+export default {
+  mixins: [pagination],
+  props: {
+    data: {
+      type: Array,
+      default: () => []
+    },
+    columns: {
+      type: Array,
+      default: () => []
+    },
+    childType: {
+      type: String,
+      default: 'order'
+    },
+    count: {
+      type: Number,
+      default: 0
+    },
+    paging: {
+      type: Boolean,
+      default: true
+    }
+  },
+  created() {
+    this.tableRow = JSON.parse(JSON.stringify(this.columns))
+    this.tableRow.forEach((row, index) => {
+      row._child = false
+      if (Array.isArray(row)) {
+        row.forEach(item => (item._child = true))
+        this.tableRow.splice(index, 1, ...row)
+      }
+    })
+  }
+}
+</script>
+
+<style lang="scss">
+.table-box {
+  .price-font {
+    font-size: 16px;
+  }
+}
+</style>
+<style lang="scss" scoped>
+.table-box {
+  .el-pagination:first-of-type {
+    margin-top: 0;
+  }
+  > div {
+    margin-bottom: 25px;
+    .child-list {
+      height: 33px;
+      line-height: 33px;
+      position: relative;
+      .is-empty {
+        font-size: 12px;
+      }
+      > div {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      &:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: -10px;
+        bottom: -1px;
+        width: calc(100% + 20px);
+        height: 1px;
+        background: #eee;
+      }
+    }
+  }
+  &-title {
+    &-left {
+      display: flex;
+      align-items: flex-start;
+      .tit {
+        text-align: center;
+      }
+    }
+    &-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+    }
+    .tit {
+      margin: 0 10px 10px 0;
+      padding: 0 10px;
+      line-height: 33px;
+      background: #eaeaea;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      > span:first-child {
+        color: #707070;
+        &:not(:only-of-type) {
+          padding-right: 10px;
+        }
+      }
+    }
+  }
+}
+</style>

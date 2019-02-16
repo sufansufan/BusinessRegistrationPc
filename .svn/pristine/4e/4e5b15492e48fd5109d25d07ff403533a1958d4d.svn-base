@@ -1,0 +1,441 @@
+<template>
+  <div class="refund-box">
+    <student :sid="sid"/>
+    <div class="refund-box-content">
+      <el-button type="goback" @click="$router.go(-1)">返回</el-button>
+      <h2>退费</h2>
+      <comm-table :data="order" :columns="orderColumns" :expand-list="expandList"/>
+      <h3>收费项</h3>
+      <comm-table :data="otherOrder" :columns="otherOrderColumns"/>
+      <h3>退费信息</h3>
+      <div class="refund-box-content-info">
+        <div class="refund-box-content-info-left">
+          <el-form ref="refundForm" :model="refundForm" :rules="rules" label-width="80px" inline>
+            <el-form-item label="退费方式" prop="refundPayType">
+              <el-select v-model="refundForm.refundPayType" placeholder="请选择">
+                <el-option
+                  v-for="item in constant.refund_pay_type"
+                  :key="item.id"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="姓名" prop="bankCardPayee">
+              <el-input v-model="refundForm.bankCardPayee" placeholder="请填写"/>
+            </el-form-item>
+            <el-form-item label="银行名称" prop="bankName">
+              <el-input v-model="refundForm.bankName" placeholder="请填写"/>
+            </el-form-item>
+            <el-form-item label="银行卡号" prop="bankcardNo">
+              <el-input v-model="refundForm.bankcardNo" placeholder="请填写"/>
+            </el-form-item>
+            <el-form-item label="退费原因" prop="refundReason" class="reason">
+              <el-select v-model="refundReaonType" placeholder="请选择退费类型" @change="insertReason">
+                <el-option
+                  v-for="item in constant.refund_reaon_type"
+                  :key="item.id"
+                  :label="item.label"
+                  :value="item.label"
+                />
+              </el-select>
+              <el-select v-model="refundReson" placeholder="请选择退费具体原因" @change="insertReason">
+                <el-option
+                  v-for="item in constant.refund_reson"
+                  :key="item.id"
+                  :label="item.label"
+                  :value="item.label"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="备注" prop="refundRemark">
+              <el-input v-model="refundForm.refundRemark" placeholder="请填写"/>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="refund-box-content-info-right">
+          <div>
+            <h4>课程退费合计</h4>
+            <count-num :num="totalOrderPrice" prefix="￥"/>
+          </div>
+          <div>
+            <h4>其他退费合计</h4>
+            <count-num :num="totalOtherPrice" prefix="￥"/>
+          </div>
+          <div>
+            <h3>退费总计</h3>
+            <count-num :num="totalAmountPrice" :size="24" prefix="￥"/>
+          </div>
+          <div class="btn">
+            <el-button @click="$router.go(-1)">取消</el-button>
+            <el-button type="primary" @click="refund">退费</el-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import Student from './student'
+import { getApplyRefund, applyRefund } from '@/api/foreground/apply'
+import SelectCourse from './components/SelectCourse'
+import { parseTime, deepClone } from '@/utils'
+export default {
+  inject: ['sid'],
+  components: {
+    Student,
+    SelectCourse
+  },
+  data() {
+    return {
+      isEdit: false,
+      expandList: [],
+      attendList: [],
+      order: [],
+      orderColumns: [
+        { label: '班级名称', prop: 'className' },
+        { label: '购课/总课节', prop: ['payAttendCount', 'totalTimes'], type: 'num' },
+        { label: '应付金额', prop: 'price', pre: '￥', type: 'num' },
+        {
+          label: '折扣',
+          render: (h, row) => {
+            return h('div', [
+              h('span', { class: 'price-font' }, row.discount),
+              h('div', row.discountReason || '无')
+            ])
+          }
+        },
+        {
+          label: '立减',
+          render: (h, row) => {
+            return h('div', [
+              h('span', { class: 'price-font' }, '￥' + row.subtractAmount),
+              h('div', row.subtractReason || '无')
+            ])
+          }
+        },
+        { label: '实付金额', prop: 'realPayment', pre: '￥', type: 'num' },
+        {
+          label: '课节单价',
+          render: (h, row) => {
+            return h('span', { class: 'price-font' }, '￥' + row.payAttend[0].amount)
+          }
+        },
+        {
+          label: '退费课次数',
+          render: (h, row, index) => {
+            return h('span', {
+              attrs: {
+                class: 'act-color price-font pointer'
+              },
+              on: {
+                click: () => this.openAttend(row.id)
+              }
+            }, row._refundNum)
+          }
+        },
+        {
+          type: 'expand',
+          width: 1,
+          className: 'hidden',
+          render: (h, row, index) => {
+            return h(SelectCourse, {
+              props: {
+                scope: { row, $index: index },
+                isEdit: true,
+                isRefund: true,
+                order: this.order,
+                attendList: this.attendList[index]
+              }
+            })
+          }
+        },
+        {
+          label: '课节退费',
+          width: 150,
+          render: (h, row, index) => {
+            return h('count-num', {
+              props: {
+                num: row._refundPrice,
+                prefix: '￥'
+              }
+            })
+          }
+        },
+        {
+          label: '额外退费',
+          render: (h, row) => {
+            return h('div', {
+              style: {
+                textAlign: 'left'
+              }
+            }, [
+              h('el-input-number', {
+                model: {
+                  value: row._otherRefundAmount,
+                  callback: val => {
+                    this.$set(row, '_otherRefundAmount', val)
+                  }
+                },
+                attrs: {
+                  min: 0,
+                  'controls-position': 'right'
+                },
+                style: {
+                  width: '100px'
+                }
+              }),
+              h('el-input', {
+                model: {
+                  value: row._otherRefundRemark,
+                  callback: val => {
+                    this.$set(row, '_otherRefundRemark', val)
+                  }
+                },
+                style: {
+                  marginTop: '7px'
+                }
+              }, row._otherRefundRemark)
+            ])
+          }
+        },
+        {
+          label: '退费总额',
+          width: 150,
+          render: (h, row, index) => {
+            row._totalAmountPrice = row._refundPrice + row._otherRefundAmount
+            return h('count-num', {
+              props: {
+                num: row._totalAmountPrice,
+                prefix: '￥'
+              }
+            })
+          }
+        }
+      ],
+      otherOrder: [],
+      otherOrderColumns: [
+        { label: '收费项目', prop: 'otherName' },
+        { label: '数量', prop: 'number', type: 'num' },
+        { label: '单价', prop: 'singlePrice', pre: '￥', type: 'num' },
+        { label: '应付金额', prop: 'price', pre: '￥', type: 'num' },
+        { label: '实付金额', prop: 'realPayment', pre: '￥', type: 'num' },
+        {
+          label: '退费数量',
+          render: (h, row) => {
+            this.$set(row, '_number', row.number)
+            return h('el-input-number', {
+              model: {
+                value: row.number,
+                callback: val => {
+                  this.$set(row, 'number', val)
+                }
+              },
+              attrs: {
+                min: 1,
+                max: row._number,
+                'controls-position': 'right'
+              }
+            })
+          }
+        },
+        {
+          label: '退费总额',
+          render: (h, row) => {
+            this.$set(row, '_refundOtherPrice', row._number * row.singlePrice)
+            return h('count-num', {
+              props: {
+                num: row._refundOtherPrice
+              },
+              attrs: {
+                prefix: '￥'
+              }
+            })
+          }
+        }
+      ],
+      refundForm: {
+        refundPayType: '1',
+        bankCardPayee: '',
+        bankName: '',
+        bankcardNo: '',
+        refundReason: '',
+        refundRemark: ''
+      },
+      refundReaonType: '',
+      refundReson: '',
+      rules: {
+        refundPayType: [{ required: true, message: '请选择退费方式' }],
+        bankCardPayee: [{ required: true, message: '请填写姓名' }],
+        bankName: [{ required: true, message: '请填写银行名称' }],
+        bankcardNo: [{ required: true, message: '请填写银行卡号' }],
+        refundReason: [{ required: true, message: '请选择退费类型和原因' }]
+      }
+    }
+  },
+  computed: {
+    ...mapGetters(['constant']),
+    totalOrderPrice() {
+      return this.order.map(item => item._totalAmountPrice).reduce((s, n) => +s + +n, 0)
+    },
+    totalOtherPrice() {
+      return this.otherOrder.map(item => item._refundOtherPrice).reduce((s, n) => +s + +n, 0)
+    },
+    totalAmountPrice() {
+      return this.totalOrderPrice + this.totalOtherPrice
+    }
+  },
+  created() {
+    this.$store.dispatch('getConstant', ['refund_pay_type', 'refund_reaon_type', 'refund_reson'])
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      getApplyRefund({ Loading: true, ids: this.$route.query.ids }).then(res => {
+        this.order = res.data.list.filter(item => {
+          if (item.otherName) {
+            this.otherOrder.push(item)
+            return false
+          } else {
+            item.payAttend.map(item => (item.workdate = parseTime(item.workdate, 'm-d')))
+            this.$set(item, '_refundNum', item.payAttend
+              .filter(item => item.whetherRefund).length)
+            this.$set(item, '_refundPrice', item.payAttend
+              .filter(item => item.whetherRefund)
+              .map(item => item.amount)
+              .reduce((s, n) => +s + +n, 0))
+            this.$set(item, '_otherRefundAmount', 0)
+            this.$set(item, '_otherRefundRemark', '')
+            this.$set(item, '_totalAmountPrice', item._refundPrice + item._otherRefundAmount)
+            this.$set(item, '_refundAttendClassIds', item.payAttend.filter(item => item.whetherRefund).map(item => item.id).join(','))
+          }
+          return true
+        })
+        this.attendList = this.order.map(item => ({ [item.classId]: deepClone(item.payAttend) }))
+      })
+    },
+    openAttend(classId, isExpand = true) {
+      if (isExpand) {
+        const list = this.expandList
+        const index = list.findIndex(item => item === classId)
+        if (index > -1) {
+          list.splice(index, 1)
+          return
+        }
+        list.push(classId)
+      }
+    },
+    insertReason(val) {
+      if (this.refundReaonType && this.refundReson) {
+        this.refundForm.refundReason = this.refundReaonType + '/' + this.refundReson
+      }
+    },
+    refund() {
+      this.$refs.refundForm.validate().then(() => {
+        const order = this.order.map(item => {
+          const { id,
+            _refundAttendClassIds,
+            _refundPrice,
+            _otherRefundAmount,
+            _otherRefundRemark } = item
+          return {
+            id,
+            refundAttendClassIds: _refundAttendClassIds,
+            refundAmount: _refundPrice,
+            otherRefundAmount: _otherRefundAmount,
+            otherRefundRemark: _otherRefundRemark
+          }
+        })
+        const otherOrder = this.otherOrder.map(item => {
+          const { id, _number, _refundOtherPrice } = item
+          return {
+            id,
+            number: _number,
+            realRefundAmount: _refundOtherPrice
+          }
+        })
+        applyRefund({
+          Loading: true,
+          order,
+          otherOrder,
+          ...this.refundForm,
+          refundAmountCount: this.totalOrderPrice,
+          otherRefundAmountCount: this.totalOtherPrice
+        }).then(() => {
+          this.$message.success('退费成功')
+          this.$router.go(-1)
+        })
+      }).catch(() => { })
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.refund-box {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 114px;
+    width: calc(100% + 44px);
+    height: 22px;
+    background: linear-gradient(to bottom, #f1f1f1, #f3f5f7, #f1f1f1);
+  }
+  &-content {
+    padding-top: 66px;
+    .el-button--goback {
+      position: absolute;
+    }
+    > h2 {
+      margin: 0 0 22px 0;
+      text-align: center;
+    }
+    .hidden i {
+      display: none;
+    }
+    &-info {
+      display: flex;
+      justify-content: space-between;
+      &-left {
+        width: 600px;
+        input {
+          width: 200px !important;
+        }
+        .el-form-item:last-child input {
+          width: 494px !important;
+        }
+        .reason {
+          input {
+            width: 245px !important;
+          }
+        }
+      }
+      &-right {
+        width: 400px;
+        > div {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          h4 {
+            margin: 10px 0;
+          }
+          &:nth-child(3) {
+            margin-top: 15px;
+            border-top: 1px solid #000;
+          }
+          &.btn {
+            justify-content: center;
+            button {
+              flex: 1;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>

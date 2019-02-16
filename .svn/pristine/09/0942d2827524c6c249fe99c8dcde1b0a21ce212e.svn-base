@@ -1,0 +1,70 @@
+import Layout from '@/views/layout/Layout'
+
+const backstage = {
+  path: '/backstage',
+  component: Layout,
+  redirect: '/backstage/campusManagement',
+  name: 'backstage',
+  meta: {
+    title: '后台系统',
+    icon: 'lock'
+  },
+  children: [
+    {
+      path: 'campusManagement',
+      component: () => import('@/views/backstage/campusManagement'),
+      name: 'CampusManagement',
+      meta: {
+        title: '校区管理'
+      }
+    },
+    {
+      path: 'classroomManagement',
+      component: () => import('@/views/backstage/classroomManagement'),
+      name: 'ClassroomManagement',
+      meta: {
+        title: '教室管理'
+      }
+    },
+    {
+      path: 'teacherManagement',
+      component: () => import('@/views/backstage/teacherManagement'),
+      redirect: '/backstage/teacherManagement/teacher',
+      name: 'TeacherManagement',
+      meta: {
+        title: '教师管理'
+      },
+      children: [
+        {
+          path: 'teacher',
+          component: () => import('@/views/backstage/teacherManagement/teacher'),
+          name: 'Teacher',
+          meta: {
+            title: '教师管理'
+          },
+          children: [
+            {
+              path: 'add/:id',
+              component: () => import('@/views/backstage/teacherManagement/teacher/add'),
+              name: 'AddTeacher',
+              meta: {
+                title: '新增教师'
+              },
+              hidden: true
+            }
+          ]
+        },
+        {
+          path: 'teacherLevel',
+          component: () => import('@/views/backstage/teacherManagement/teacherLevel'),
+          name: 'TeacherLevel',
+          meta: {
+            title: '教师级别'
+          }
+        }
+      ]
+    }
+  ]
+}
+
+export default backstage

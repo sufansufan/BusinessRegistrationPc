@@ -1,0 +1,162 @@
+import Layout from '@/views/layout/Layout'
+
+const backstage = {
+  path: '/backstage',
+  component: Layout,
+  redirect: '/backstage/campusManagement',
+  name: 'backstage',
+  meta: {
+    title: '后台系统',
+    icon: 'lock'
+  },
+  children: [
+    {
+      path: 'campusManagement',
+      component: () => import('@/views/backstage/campusManagement'),
+      name: 'CampusManagement',
+      meta: {
+        title: '校区管理'
+      }
+    },
+    {
+      path: 'classroomManagement',
+      component: () => import('@/views/backstage/classroomManagement'),
+      name: 'ClassroomManagement',
+      meta: {
+        title: '教室管理'
+      }
+    },
+    {
+      path: 'teacherManagement',
+      component: () => import('@/views/backstage/teacherManagement'),
+      redirect: '/backstage/teacherManagement/teacher',
+      name: 'TeacherManagement',
+      meta: {
+        title: '教师管理'
+      },
+      children: [
+        {
+          path: 'teacher',
+          component: () =>
+            import('@/views/backstage/teacherManagement/teacher'),
+          name: 'Teacher',
+          meta: {
+            title: '教师管理'
+          },
+          children: [
+            {
+              path: 'add/:id',
+              component: () =>
+                import('@/views/backstage/teacherManagement/teacher/add'),
+              name: 'AddTeacher',
+              meta: {
+                title: '新增教师'
+              },
+              hidden: true
+            }
+          ]
+        },
+        {
+          path: 'teacherLevel',
+          component: () =>
+            import('@/views/backstage/teacherManagement/teacherLevel'),
+          name: 'TeacherLevel',
+          meta: {
+            title: '教师级别'
+          }
+        }
+      ]
+    },
+    {
+      path: 'courseManagement',
+      component: () => import('@/views/backstage/courseManagement'),
+      redirect: '/backstage/courseManagement/classManagement',
+      name: 'CourseManagement',
+      meta: {
+        title: '课程管理'
+      },
+      children: [
+        {
+          path: 'classManagement',
+          component: () => import('@/views/backstage/courseManagement/classManagement'),
+          name: 'ClassManagement',
+          meta: {
+            title: '班级管理'
+          },
+          children: [
+            {
+              path: 'add',
+              component: () => import('@/views/backstage/courseManagement/classManagement/add'),
+              name: 'AddClass',
+              meta: {
+                title: '新增班级'
+              },
+              hidden: true
+            },
+            {
+              path: 'batchSetting',
+              component: () => import('@/views/backstage/courseManagement/classManagement/batchSetting'),
+              name: 'BatchSetting',
+              meta: {
+                title: '批量设置'
+              },
+              hidden: true
+            }
+          ]
+        },
+        {
+          path: 'courseLabel',
+          component: () => import('@/views/backstage/courseManagement/courseLabel'),
+          name: 'CourseLabel',
+          meta: {
+            title: '课程标签'
+          }
+        },
+        {
+          path: 'courseArrangeLaw',
+          component: () => import('@/views/backstage/courseManagement/courseArrangeLaw'),
+          name: 'CourseArrangeLaw',
+          meta: {
+            title: '课程安排规律'
+          }
+        },
+        {
+          path: 'timeStepManagement',
+          component: () => import('@/views/backstage/courseManagement/timeStepManagement'),
+          name: 'TimeStepManagement',
+          meta: {
+            title: '时段管理'
+          }
+        }
+      ]
+    },
+    {
+      path: 'studentInfoManagement',
+      component: () => import('@/views/backstage/studentInfoManagement'),
+      name: 'studentInfoManagement',
+      meta: {
+        title: '学员信息管理'
+      }
+    },
+    {
+      path: 'editStudent/:id',
+      component: () =>
+        import('@/views/backstage/studentInfoManagement/edit'),
+      name: 'EditStudent',
+      meta: {
+        title: '编辑学员信息'
+      },
+      hidden: true
+    },
+    {
+      path: 'networkTimeMaintain',
+      component: () => import('@/views/backstage/networkTimeMaintain'),
+      name: 'NetworkTimeMaintain',
+      meta: {
+        title: '网报时间维护'
+      }
+    }
+  ]
+}
+
+export default backstage

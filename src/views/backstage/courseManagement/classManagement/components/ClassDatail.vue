@@ -1,0 +1,91 @@
+<template>
+  <div class="class-create">
+    <div class="class-info-box">
+      <div>
+        <h2>{{ classTilte.className }}</h2>
+        <span>{{ classTilte.classInfo }}</span>
+      </div>
+      <div>
+        <em class="act-color">{{ classTilte.classMoney ? '￥' + classTilte.classMoney : '' }}</em>
+      </div>
+    </div>
+    <div class="class-list-box">
+      <slot name="batchSetting"/>
+      <slot name="classList"/>
+    </div>
+  </div>
+
+</template>
+
+<script>
+export default {
+  props: {
+    classTilte: {
+      default: () => { },
+      type: Object
+    }
+  },
+  data() {
+    return {
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.class-create{
+   position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 121px;
+    width: calc(100% + 44px);
+    height: 22px;
+    background: linear-gradient(to bottom, #f1f1f1, #f3f5f7, #f1f1f1);
+  }
+  .class-info-box {
+    height: 92px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    &::before {
+      content: "";
+      position: absolute;
+      top: -11px;
+      left: -22px;
+      width: 3px;
+      height: calc(100% + 22px);
+    }
+    & > div:first-child{
+      margin-top: -10px;
+      & > span{
+        color: #9c9c9c;
+      }
+    }
+    & > div:last-child{
+      margin-top: 24px;
+      font-size: 30px;
+    }
+  }
+  .class-list-box{
+    padding-top: 70px;
+    &-hander{
+      display: flex;
+      & > div{
+        width: 100%;
+      }
+    }
+    .class-list{
+      margin-top: 20px;
+      &-btn{
+        & > div {
+          display: flex;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+</style>

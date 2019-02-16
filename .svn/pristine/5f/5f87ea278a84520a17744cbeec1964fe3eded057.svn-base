@@ -1,0 +1,458 @@
+<template>
+  <div class="teacher-level-box">
+    <div class="select-tools">
+      <div>
+        <div>
+          <el-input v-model.trim="select.teacherNo" clearable placeholder="工号"/>
+        </div>
+        <div>
+          <el-input v-model.trim="select.nameAndMobile" clearable placeholder="老师姓名/手机号"/>
+        </div>
+        <div>
+          <el-select v-model="select.subject" placeholder="科目" clearable>
+            <el-option
+              v-for="item in constant.subject"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.teacherLevelName" placeholder="级别名称" clearable>
+            <el-option
+              v-for="item in levelList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.teacherBasicLevel" placeholder="基本级别" clearable>
+            <el-option
+              v-for="item in levelList"
+              :key="item.id"
+              :label="item.basicLevel"
+              :value="item.id"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-cascader
+            :options="constant.campus"
+            v-model="select.adminOrganIds"
+            :props="campusProps"
+            placeholder="校区"
+            change-on-select
+            clearable/>
+        </div>
+      </div>
+      <div class="btn">
+        <div>
+          <el-button type="primary" icon="el-icon-search" @click="fetchData">搜索</el-button>
+        </div>
+        <div>
+          <el-button icon="el-icon-refresh">重置搜索条件</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-plus" @click="modify('add')">新增</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-download">导出</el-button>
+        </div>
+      </div>
+    </div>
+    <el-table :data="dataList" stripe border style="width: 100%" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55"/>
+      <el-table-column label="校区" width="150px">
+        <template slot-scope="scope">
+          <div>
+            {{ scope.row.adminOrganNames[0] }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column prop="subjectName" label="科目" width="150"/>
+      <el-table-column prop="no" label="工号"/>
+      <el-table-column prop="teacherName" label="姓名"/>
+      <el-table-column prop="mobile" label="手机号"/>
+      <el-table-column prop="teacherLevelName" label="级别名称"/>
+      <el-table-column prop="basicLevel" label="基本级别"/>
+      <el-table-column prop="salary" label="课时费"/>
+      <el-table-column prop="compulsoryHour" label="义务课时"/>
+      <el-table-column prop="takeEffectDate" label="生效日期"/>
+      <el-table-column prop="updateByName" label="操作人"/>
+      <el-table-column prop="updateDate" label="操作日期"/>
+      <el-table-column label="操作" width="150" fixed="right">
+        <template slot-scope="scope" >
+          <el-button :disabled="!scope.row.whetherEdit" type="text" @click="modify('edit', scope.row)">编辑</el-button>
+          <el-button :disabled="!scope.row.whetherDelete" type="text" @click="deleteLevel('self', scope.row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div class="batch-delete">
+      <el-button :disabled="!multipleSelection.length" type="primary" @click="deleteLevel('all')">批量删除</el-button>
+    </div>
+    <el-pagination
+      v-show="count"
+      :page-sizes="pageSizes"
+      :page-size="limit"
+      :total="count"
+      :current-page="page"
+      :layout="pageLayout"
+      class="campus-pagination"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+    />
+    <Dialog ref="dialog" width="50%" top="100px">
+      <el-form ref="teacherLevelForm" :model="teacherLevelForm" :key="key" :rules="teacherLevelRules" label-position="top" class="teacher-level-form">
+        <el-form-item label="选择教师" prop="teacher.teacherName">
+          <div class="input-teacher">
+            <div>
+              <el-cascader
+                :options="constant.campus"
+                v-model="teacherLevelForm.searchTeacher.adminOrganIds"
+                :props="campusProps"
+                placeholder="校区"
+                change-on-select/>
+            </div>
+            <div>
+              <el-autocomplete v-model.trim="teacherLevelForm.teacher.teacherName" :fetch-suggestions="querySearch" style="width: 100%" popper-class="my-autocomplete" placeholder="请输入内容" class="input-select" @select="selectTeacher">
+                <template slot-scope="{ item }">
+                  <div>{{ item.name }}</div>
+                </template>
+                <div slot="prepend">
+                  <el-select v-model="teacherLevelForm.searchTeacher.subject" placeholder="科目" clearable class="subject-select">
+                    <el-option
+                      v-for="item in constant.subject"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </div>
+                <span slot="append">工号: {{ teacherLevelForm.teacher.teacherNo }}</span>
+              </el-autocomplete>
+            </div>
+          </div>
+        </el-form-item>
+        <el-form-item label="级别名称" prop="teacherLevelId">
+          <el-select v-model="teacherLevelForm.teacherLevelId" placeholder="级别名称" @change="teacherLevelChange">
+            <el-option
+              v-for="item in levelList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="基本级别">
+          <strong class="base-level">{{ teacherLevelForm.basicLevel }}</strong>
+        </el-form-item>
+        <el-form-item label="课时费" prop="salary">
+          <el-input v-model.trim="teacherLevelForm.salary" @blur="teacherLevelForm.salary = Number(teacherLevelForm.salary).toFixed(2)"/>
+        </el-form-item>
+        <el-form-item/>
+        <el-form-item label="义务课时" prop="compulsoryHour">
+          <el-input v-model.trim="teacherLevelForm.compulsoryHour"/>
+        </el-form-item>
+        <el-form-item label="生效日期" prop="takeEffectDate">
+          <el-date-picker
+            v-model="teacherLevelForm.takeEffectDate"
+            type="date"
+            placeholder="选择日期"
+            style="width: 100%"/>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" size="big" @click="saveLevel">确 定</el-button>
+        <el-button size="big" @click="$refs.dialog.show = false">取 消</el-button>
+      </span>
+    </Dialog>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import tables from '@/mixin/tables'
+import Dialog from '@/components/Dialog'
+import { getTeacherLevelHistoryList, getTeacherLevelList, getTeacherList, editTeacherLevelHistory, deleteTeacherLevelHistory } from '@/api/backstage/teacherManagement'
+import { validateNumber, validateJustFloat } from '@/utils/validate'
+import { parseTime, id2Level } from '@/utils'
+export default {
+  components: {
+    Dialog
+  },
+  mixins: [tables],
+  data() {
+    const number = (rule, value, callback) => {
+      if (!validateNumber(value)) {
+        callback(new Error('请输入数字'))
+      } else {
+        callback()
+      }
+    }
+    const justFloat = (rule, value, callback) => {
+      if (!validateJustFloat(value)) {
+        callback(new Error('请输入数字'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      key: 1,
+      select: {
+        teacherNo: '',
+        subject: '',
+        adminOrganIds: [],
+        teacherName: '',
+        teacherMobile: '',
+        teacherLevelName: '',
+        teacherBasicLevel: '',
+        nameAndMobile: ''
+      },
+      dataList: [],
+      levelList: [],
+      teacherList: [],
+      multipleSelection: [],
+      teacherLevelForm: {
+        teacherId: '',
+        teacherLevelId: '',
+        teacherLevelName: '',
+        basicLevel: '',
+        salary: '',
+        compulsoryHour: '',
+        takeEffectDate: '',
+        searchTeacher: {
+          adminOrganIds: [],
+          subject: ''
+        },
+        teacher: {
+          teacherNo: '',
+          teacherName: ''
+        }
+      },
+      deepTeacherLevel: {},
+      teacherLevelRules: {
+        'teacher.teacherName': [
+          { required: true, message: '请选择教师', trigger: ['change', 'blur'] }
+        ],
+        teacherLevelId: [
+          { required: true, message: '请选择级别名称', trigger: 'change' }
+        ],
+        salary: [{ required: true, validator: justFloat, trigger: 'blur' }],
+        compulsoryHour: [{ required: true, validator: number, trigger: 'blur' }],
+        takeEffectDate: [{ required: true, message: '请选择级别名称', trigger: 'change' }]
+      },
+      campusProps: {
+        value: 'id',
+        label: 'name'
+      }
+    }
+  },
+  computed: {
+    ...mapGetters(['constant'])
+  },
+  watch: {
+    'teacherLevelForm.searchTeacher': {
+      handler() {
+        this.getTeacher()
+      },
+      deep: true
+    }
+  },
+  created() {
+    this.$store.dispatch('getConstant', ['subject', 'campus']).then(() => {
+      this.fetchData()
+      this.getLevelList()
+      this.deepTeacherLevel = JSON.parse(JSON.stringify(this.teacherLevelForm))
+    })
+  },
+  methods: {
+    fetchData() {
+      const { adminOrganIds, nameAndMobile } = this.select
+      const params = {
+        page: this.page,
+        limit: this.limit,
+        ...this.select
+      }
+      validateNumber(nameAndMobile) ? params.teacherMobile = nameAndMobile : params.teacherName = nameAndMobile
+      params.adminOrganIds = adminOrganIds[adminOrganIds.length - 1]
+      delete params.nameAndMobile
+      this.BFD(getTeacherLevelHistoryList(params).then(({ data }) => {
+        const { count, list } = data
+        this.count = count
+        this.dataList = list
+        this.dataList.map(item => {
+          item.subjectName = this.constant.subject.filter(d => item.subject.split(',')[0] === d.value)[0].label
+          item.takeEffectDate = parseTime(item.takeEffectDate, 'y-m-d')
+          item.updateDate = parseTime(item.updateDate, 'y-m-d')
+          return item
+        })
+      }))
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
+    },
+    modify(type, row) {
+      if (type === 'edit') {
+        const { teacherId, teacherLevelId, teacherLevelName, basicLevel, salary, compulsoryHour, takeEffectDate, adminOrganIds, subject, no: teacherNo, teacherName } = row
+        this.teacherLevelForm = {
+          teacherId,
+          teacherLevelId,
+          teacherLevelName,
+          basicLevel,
+          salary,
+          compulsoryHour,
+          takeEffectDate,
+          searchTeacher: {
+            adminOrganIds: id2Level(this.constant.campus, adminOrganIds),
+            subject: subject.split(',')[0]
+          },
+          teacher: {
+            teacherNo,
+            teacherName
+          }
+        }
+        this.$refs.dialog.setTitle('编辑教师级别')
+      } else {
+        this.teacherLevelForm = JSON.parse(JSON.stringify(this.deepTeacherLevel))
+        this.$refs.dialog.setTitle('新增教师级别')
+      }
+      this.$refs.dialog.show = true
+      this.key = this.key + 1
+      this.getTeacher()
+    },
+    getLevelList() {
+      getTeacherLevelList({ teacherLevelStatus: true }).then(({ data }) => {
+        this.levelList = data.list
+      })
+    },
+    getTeacher() {
+      const { adminOrganIds, subject } = this.teacherLevelForm.searchTeacher
+      const params = {
+        adminOrganIds: adminOrganIds[adminOrganIds.length - 1],
+        subject,
+        teacherStatus: true
+      }
+      getTeacherList(params).then(({ data }) => {
+        this.teacherList = data.list
+      })
+    },
+    teacherLevelChange(val) {
+      this.teacherLevelForm.basicLevel = this.levelList.find(item => (item.id === val)).basicLevel
+    },
+    querySearch(queryString, cb) {
+      var results = queryString ? this.teacherList.filter(item => item.name.includes(queryString)) : this.teacherList
+      cb(results)
+    },
+    selectTeacher(val) {
+      const { id, no, name } = val
+      this.teacherLevelForm.teacherId = id
+      this.teacherLevelForm.teacher.teacherNo = no
+      this.teacherLevelForm.teacher.teacherName = name
+    },
+    saveLevel() {
+      const { teacherNo } = this.teacherLevelForm.teacher
+      if (!teacherNo) {
+        this.$message.error('请输入正确的老师')
+        return
+      }
+      const params = {
+        ...this.teacherLevelForm
+      }
+      delete params.teacher
+      delete params.searchTeacher
+      editTeacherLevelHistory({ teacherLevelHistory: params }).then(res => {
+        this.fetchData()
+        params.id ? this.$message.success('编辑成功') : this.$message.success('新增成功')
+        this.$refs.dialog.show = false
+      })
+    },
+    deleteLevel(type, id) {
+      this.$confirm('是否删除改数据?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        var ids = ''
+        if (type === 'self') {
+          ids = id
+        } else {
+          this.multipleSelection.forEach(item => {
+            ids += item.id + ','
+          })
+        }
+        deleteTeacherLevelHistory({ ids }).then(res => {
+          this.$message.success('删除成功')
+          this.fetchData()
+        })
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.teacher-level-box{
+  .batch-delete{
+    margin-top: 20px;
+  }
+  .teacher-level-form{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    .el-form-item {
+      width:calc(50% - 10px);
+      .el-select{
+        width: 100%;
+      }
+      &:first-child{
+        width: 100%;
+      }
+      .base-level{
+        font-size: 32px;
+        margin-left: 15%;
+      }
+      .input-teacher{
+        display: flex;
+        width: 100%;
+        & > div:last-child{
+          margin-top: -1px;
+          width:80%;
+        }
+      }
+    }
+  }
+}
+</style>
+<style lang="scss">
+.teacher-level-box{
+  .teacher-level-form{
+    .input-select{
+      .el-input-group__prepend {
+        border-left: none;
+        background-color: #fff;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+      }
+      .el-select .el-input {
+        width: 200px;
+      }
+    }
+    .input-teacher{
+      .el-cascader .el-input, .el-cascader .el-input__inner{
+        // border-right: none;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+     }
+    }
+  }
+}
+
+</style>
+<style>
+.teacher-level-box .select-tools .btn{
+  margin-right: 0px !important;
+}
+</style>

@@ -1,0 +1,81 @@
+import checkPermission from '@/utils/permission'
+import { pickerOptions } from '@/utils'
+import pagination from './pagination'
+export default {
+  mixins: [pagination],
+  data() {
+    return {
+      count: 0,
+      loading: true,
+      resetSearchCriteria: {},
+      quickOptions: {
+        shortcuts: pickerOptions
+      }
+    }
+  },
+  computed: {
+    lastRoute() {
+      return this.$route.matched.length > 2
+    }
+  },
+  mounted() {
+    this.select && this.initSearchCriteria()
+  },
+  methods: {
+    checkPermission,
+    initSearchCriteria() {
+      // 深拷贝默认搜索条件，以便重置搜索
+      this.resetSearchCriteria = JSON.parse(JSON.stringify(this.select))
+    },
+    resetSearch() {
+      // 重置搜索条件
+      this.select = JSON.parse(JSON.stringify(this.resetSearchCriteria))
+      if (this.$refs.multiCascader) {
+        this.$refs.multiCascader.clearLabels()
+      }
+    },
+    BFD(fetchFn, loadName = 'loading') {
+      this[loadName] = true
+      return fetchFn
+        .then(() => {
+          this[loadName] = false
+        })
+        .catch(() => {
+          this[loadName] = false
+        })
+    },
+    renderStateTag(state, str) {
+      // 返回状态的Tag标签
+      const stateList = {
+        success: [true, '审核通过', '启用', '已付款'],
+        info: ['草稿', '申请中', '未签到'],
+        warning: ['待审核', '打款中'],
+        danger: [false, '审核不通过', '停用', '错误', '打款失败', '不通过']
+      }
+      let tagType = ''
+      for (const i in stateList) {
+        if (stateList[i].includes(state)) {
+          tagType = i
+        }
+      }
+      return this.$createElement(
+        'el-tag',
+        {
+          attrs: {
+            type: tagType
+          }
+        },
+        str ? str[state] : state
+      )
+    },
+    monthRangeBlur(vm, data) {
+      // 月份多选插件光标处理
+      let refs = []
+      data
+        ? (refs = ['startMonth' + data, 'endMonth' + data])
+        : (refs = ['startMonth', 'endMonth'])
+      const nextRef = refs.filter(item => item !== vm.name)
+      vm.value && !this.$refs[nextRef].value && this.$refs[nextRef].focus()
+    }
+  }
+}
