@@ -1,0 +1,39 @@
+<template>
+  <div class="pay-management-box">
+    <div class="arrow-list-box">
+      <div>
+        <h5>总收入</h5>
+        <count-num :num="1002211" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>课程收入</h5>
+        <count-num :num="1002211" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>其他收费</h5>
+        <count-num :num="1002211" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>报名总人数</h5>
+        <count-num :num="1002211" :to-fixed="0" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>报名总人次</h5>
+        <count-num :num="1930" :to-fixed="0" class="act-color"/>
+      </div>
+      <div>
+        <h5>订单总数</h5>
+        <count-num :num="532" :to-fixed="0" class="act-color"/>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+
+}
+</script>
+
+<style scoped>
+</style>

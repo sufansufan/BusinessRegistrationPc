@@ -1,0 +1,105 @@
+<template>
+  <div class="refund-management-box">
+    <div class="refund-management-box header">
+      <div>
+        <h5>打款总金额</h5>
+        <count-num :num="1002211" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>课程打款</h5>
+        <count-num :num="1002211" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>其他打款</h5>
+        <count-num :num="1002211" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>额外退费打款</h5>
+        <count-num :num="1002211" class="act-color" prefix="￥"/>
+      </div>
+      <div>
+        <h5>退费总人数</h5>
+        <count-num :num="1930" :to-fixed="0" class="act-color"/>
+      </div>
+      <div>
+        <h5>退费总人次</h5>
+        <count-num :num="532" :to-fixed="0" class="act-color"/>
+      </div>
+    </div>
+    <refund-query :is-audit="true">
+      <template slot-scope="{row}">
+        <el-button
+          type="text"
+          @click="$router.push({path: `/finance/audit/${row.studentId}?id=${row.id}`})"
+        >审核</el-button>
+      </template>
+    </refund-query>
+  </div>
+</template>
+
+<script>
+import RefundQuery from '../foreground/businessQuery/refundQuery'
+export default {
+  components: {
+    RefundQuery
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.refund-management-box {
+  &.header {
+    display: flex;
+    justify-content: space-between;
+    background: #fff;
+    padding: 7px;
+    > div {
+      background: #f7f7f7;
+      flex: 1;
+      min-width: 162px;
+      height: 87px;
+      position: relative;
+      padding: 0 0 0 14px;
+      margin-right: 7px;
+      // filter: drop-shadow(0 0 10px #ccc);
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -7px;
+        border-left: 7px solid #f7f7f7;
+        border-top: 44px solid transparent !important;
+        border-bottom: 44px solid transparent !important;
+        border-right: none;
+      }
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-top: 44px solid transparent !important;
+        border-bottom: 44px solid transparent !important;
+        border-left: 7px solid #fff;
+        border-right: none;
+      }
+      h5 {
+        color: #444;
+        font-size: 15px;
+        margin: 20px 0 10px;
+        position: relative;
+        padding-left: 20px;
+        &::before {
+          content: "·";
+          font-size: 50px;
+          font-weight: bold;
+          position: absolute;
+          left: 0;
+          top: 0;
+          line-height: 18px;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+}
+</style>

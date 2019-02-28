@@ -1,0 +1,57 @@
+<template>
+  <div class="refundRecord">
+    <el-tabs v-model="tabsName">
+      <el-tab-pane label="退费单" name="refundOrder">
+        <refund-order :select-criteria="select.refundSelect">
+          <template v-if="isAudit" slot-scope="{row}">
+            <slot :row="row"/>
+          </template>
+          <template slot="refund">
+            <slot name="refund"/>
+          </template>
+          <template slot="refundBtn">
+            <slot name="refundBtn"/>
+          </template>
+        </refund-order>
+      </el-tab-pane>
+      <el-tab-pane label="报名退费" name="applyRefund" lazy>
+        <apply-refund :select-criteria="select.applySelect">
+          <slot name="apply"/>
+        </apply-refund>
+      </el-tab-pane>
+      <el-tab-pane label="其他退费" name="otherRefund" lazy>
+        <other-refund :select-criteria="select.otherSelect">
+          <slot name="other"/>
+        </other-refund>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</template>
+
+<script>
+import RefundOrder from './RefundOrder'
+import ApplyRefund from './ApplyRefund'
+import OtherRefund from './OtherRefund'
+export default {
+  components: {
+    RefundOrder,
+    ApplyRefund,
+    OtherRefund
+  },
+  props: {
+    isAudit: {
+      type: Boolean,
+      default: false
+    },
+    select: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+  data() {
+    return {
+      tabsName: 'refundOrder'
+    }
+  }
+}
+</script>

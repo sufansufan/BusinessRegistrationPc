@@ -1,0 +1,32 @@
+/* Layout */
+import Layout from '@/views/layout/Layout'
+
+export default {
+  path: '/finance',
+  component: Layout,
+  redirect: '/finance/refund',
+  name: 'Finance',
+  meta: {
+    title: '财务',
+    icon: 'configure'
+  },
+  children: [
+    {
+      path: 'refund',
+      component: () => import('@/views/finance/refund'),
+      name: 'refund',
+      meta: {
+        title: '退费管理'
+      }
+    },
+    {
+      path: 'audit/:id',
+      component: () => import('@/views/finance/audit'),
+      name: 'RefundAudit',
+      meta: {
+        title: '退费审核'
+      },
+      hidden: true
+    }
+  ]
+}

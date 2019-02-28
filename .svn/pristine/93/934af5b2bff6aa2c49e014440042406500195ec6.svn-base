@@ -1,0 +1,365 @@
+<template>
+  <div>
+    <refund-record :select="{refundSelect, applySelect, otherSelect}">
+      <template slot="refund">
+        <div>
+          <el-select v-model="refundSelect.particularYear" clearable placeholder="年度">
+            <el-option
+              v-for="item in constant.particular_year"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="refundSelect.season" clearable placeholder="季节">
+            <el-option
+              v-for="item in constant.season"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="refundSelect.periods" clearable placeholder="期别">
+            <el-option
+              v-for="item in constant.periods"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="refundSelect.grade" clearable placeholder="年级">
+            <el-option
+              v-for="item in constant.grade"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="refundSelect.subject" clearable placeholder="科目">
+            <el-option
+              v-for="item in constant.subject"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="refundSelect.projectType" clearable placeholder="类别">
+            <el-option
+              v-for="item in constant.project_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="refundSelect.classType" clearable placeholder="班型">
+            <el-option
+              v-for="item in constant.class_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="refundSelect.department" clearable placeholder="学部">
+            <el-option
+              v-for="item in constant.department_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+      </template>
+      <div slot="refundBtn">
+        <el-button type="primary" icon="el-icon-download">导出</el-button>
+      </div>
+      <template slot="apply">
+        <div>
+          <el-select v-model="applySelect.particularYear" clearable placeholder="年度">
+            <el-option
+              v-for="item in constant.particular_year"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="applySelect.season" clearable placeholder="季节">
+            <el-option
+              v-for="item in constant.season"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="applySelect.periods" clearable placeholder="期别">
+            <el-option
+              v-for="item in constant.periods"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="applySelect.grade" clearable placeholder="年级">
+            <el-option
+              v-for="item in constant.grade"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="applySelect.subject" clearable placeholder="科目">
+            <el-option
+              v-for="item in constant.subject"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="applySelect.projectType" clearable placeholder="类别">
+            <el-option
+              v-for="item in constant.project_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="applySelect.classType" clearable placeholder="班型">
+            <el-option
+              v-for="item in constant.class_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="applySelect.department" clearable placeholder="学部">
+            <el-option
+              v-for="item in constant.department_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-date-picker
+            v-model="applyTimes"
+            :picker-options="quickOptions"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="timestamp"
+            @change="val => parseDate(val, 'operationStartDate', 'operationEndDate', 'applySelect')"
+          />
+        </div>
+        <div>
+          <el-cascader
+            :options="constant.campus"
+            v-model="applyCampus"
+            :props="{label: 'name', value:'id'}"
+            placeholder="校区"
+            change-on-select
+            @change="val => getLastVal(val, 'campusId', 'applySelect')"
+          />
+        </div>
+        <div>
+          <el-input v-model="applySelect.className" placeholder="班级名称"/>
+        </div>
+        <div>
+          <el-select v-model="applySelect.refundStatus" placeholder="退费状态">
+            <el-option
+              v-for="item in constant.refund_status"
+              :key="item.id"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-input v-model="applySelect.refundRecordNo" placeholder="退费单ID"/>
+        </div>
+        <div>
+          <el-input v-model="applySelect.studentNameAndPhone" placeholder="学员姓名/手机号"/>
+        </div>
+        <div>
+          <el-button type="primary" @click="search('ApplyRefund')">搜索</el-button>
+        </div>
+        <div>
+          <el-button icon="el-icon-refresh" @click="resetSearch">重置搜索条件</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-download">导出</el-button>
+        </div>
+      </template>
+      <template slot="other">
+        <div>
+          <el-date-picker
+            v-model="otherTimes"
+            :picker-options="quickOptions"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="timestamp"
+            @change="val => parseDate(val, 'operationStartDate', 'operationEndDate', 'otherSelect')"
+          />
+        </div>
+        <div>
+          <el-cascader
+            :options="constant.campus"
+            v-model="otherCampus"
+            :props="{label: 'name', value:'id'}"
+            placeholder="校区"
+            change-on-select
+            @change="val => getLastVal(val, 'campusId', 'otherSelect')"
+          />
+        </div>
+        <div>
+          <el-input v-model="otherSelect.chargeItemName" placeholder="收费内容"/>
+        </div>
+        <div>
+          <el-select v-model="otherSelect.category" placeholder="收费类型">
+            <el-option
+              v-for="item in constant.charge_type"
+              :key="item.id"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="otherSelect.refundStatus" placeholder="退费状态">
+            <el-option
+              v-for="item in constant.refund_status"
+              :key="item.id"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-input v-model="otherSelect.refundRecordNo" placeholder="退费单ID"/>
+        </div>
+        <div>
+          <el-input v-model="otherSelect.studentNameAndPhone" placeholder="学员姓名/手机号"/>
+        </div>
+        <div>
+          <el-button type="primary" @click="search('OhterRefund')">搜索</el-button>
+        </div>
+        <div>
+          <el-button icon="el-icon-refresh" @click="resetSearch">重置搜索条件</el-button>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-download">导出</el-button>
+        </div>
+      </template>
+    </refund-record>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import tables from '@/mixin/tables'
+import RefundRecord from '../apply/components/RefundRecord'
+import { findComponentDownward } from '@/utils/findCom'
+export default {
+  name: 'RefundQuery',
+  components: {
+    RefundRecord
+  },
+  mixins: [tables],
+  provide() {
+    return {
+      sid: ''
+    }
+  },
+  data() {
+    return {
+      applyTimes: [],
+      otherTimes: [],
+      applyCampus: [],
+      otherCampus: [],
+      refundSelect: {
+        particularYear: '',
+        season: '',
+        periods: '',
+        grade: '',
+        subject: '',
+        projectType: '',
+        classType: '',
+        department: ''
+      },
+      applySelect: {
+        particularYear: '',
+        season: '',
+        periods: '',
+        grade: '',
+        subject: '',
+        projectType: '',
+        classType: '',
+        department: '',
+        operationStartDate: '',
+        operationEndDate: '',
+        campusId: '',
+        className: '',
+        refundStatus: '',
+        refundRecordNo: '',
+        studentNameAndPhone: ''
+      },
+      otherSelect: {
+        operationStartDate: '',
+        operationEndDate: '',
+        campusId: '',
+        chargeItemName: '',
+        category: '',
+        refundStatus: '',
+        refundRecordNo: '',
+        studentNameAndPhone: ''
+      }
+    }
+  },
+  computed: {
+    ...mapGetters(['constant'])
+  },
+  created() {
+    this.$store.dispatch('getConstant', ['particular_year', 'campus', 'season', 'periods', 'grade', 'subject', 'timeslot_type', 'project_type', 'class_type', 'week_day_type', 'department_type', 'charge_type'])
+  },
+  methods: {
+    search(comName) {
+      const com = findComponentDownward(this, comName)
+      com.fetchData('search')
+    }
+  }
+}
+</script>
