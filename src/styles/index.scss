@@ -304,7 +304,8 @@ code {
   display: flex;
   justify-content: space-between;
   background: #fff;
-  padding: 7px;
+  padding: 7px 7px 0;
+  flex-wrap: wrap;
   > div {
     background: #f7f7f7;
     flex: 1;
@@ -312,7 +313,7 @@ code {
     height: 87px;
     position: relative;
     padding: 0 0 0 14px;
-    margin-right: 7px;
+    margin: 0 7px 7px 0;
     // filter: drop-shadow(0 0 10px #ccc);
     &::after {
       content: '';

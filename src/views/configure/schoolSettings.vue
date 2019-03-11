@@ -17,18 +17,19 @@
         </div>
         <div>
           <el-cascader
-            :options="constant.campus"
-            v-model="campus"
+            :options="cityTree"
+            v-model="city"
             :props="{value: 'id', label: 'name'}"
             placeholder="行政区划"
             change-on-select
+            clearable
             @change="val => getLastVal(val, 'cityId')"
           />
         </div>
       </div>
       <div class="btn">
         <div>
-          <el-button type="primary" icon="el-icon-search">搜索</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="fetchData('search')">搜索</el-button>
         </div>
         <div>
           <el-button icon="el-icon-refresh">重置搜索条件</el-button>
@@ -75,6 +76,7 @@
     <Dialog ref="dialog" width="478px">
       <el-form
         ref="schoolSettingForm"
+        :key="key"
         :inline="true"
         :model="schoolSettingForm"
         :rules="rules"
@@ -82,8 +84,8 @@
       >
         <el-form-item label="行政区划" prop="cityId">
           <el-cascader
-            :options="constant.campus"
-            v-model="dialogCampus"
+            :options="cityTree"
+            v-model="dialogCity"
             :props="{value: 'id', label: 'name'}"
             placeholder="行政区划"
             style="width: 200px;"
@@ -126,7 +128,8 @@ import { mapGetters } from 'vuex'
 import tables from '@/mixin/tables'
 import Dialog from '@/components/Dialog'
 import { getSchoolList, addAndEditSchool, delSchool } from '@/api/configure'
-import { id2Level } from '@/utils'
+import { getCityTree } from '@/api/backstage/campusManagement'
+import { id2Level, treeChildrenEmpty } from '@/utils'
 export default {
   components: {
     Dialog
@@ -134,14 +137,16 @@ export default {
   mixins: [tables],
   data() {
     return {
-      campus: [],
+      key: 1,
+      cityTree: [],
+      city: [],
       select: {
         departmentType: '',
         cityId: '',
         schoolName: ''
       },
       dataList: [],
-      dialogCampus: [],
+      dialogCity: [],
       dialogDepartmentType: [],
       rowId: '',
       schoolSettingForm: {
@@ -161,26 +166,45 @@ export default {
     ...mapGetters(['constant'])
   },
   created() {
-    this.$store.dispatch('getConstant', ['department_type', 'campus'])
+    this.$store.dispatch('getConstant', 'department_type')
+    this.getCityTree()
     this.fetchData()
   },
   methods: {
+    getCityTree() {
+      getCityTree({}).then(res => {
+        this.cityTree = treeChildrenEmpty(res.data.list)
+      })
+    },
+    initOptions() {
+      this.rowId = ''
+      this.dialogCity = []
+      this.dialogDepartmentType = []
+      this.schoolSettingForm = {
+        cityId: '',
+        schoolName: '',
+        departmentType: '',
+        schoolAddress: ''
+      }
+    },
     schoolSetting(type, row) {
       const dialog = this.$refs.dialog
+      this.key = this.key + 1
       dialog.setTitle('新增学校')
-      this.rowId = ''
+      this.initOptions()
       if (type === 'edit') {
         dialog.setTitle('编辑学校')
         for (const i in this.schoolSettingForm) {
           this.schoolSettingForm[i] = row[i] || ''
         }
         this.rowId = row.id
-        this.dialogCampus = id2Level(this.schoolSettingForm.cityId, this.constant.campus)
+        this.dialogCity = id2Level(this.cityTree, this.schoolSettingForm.cityId)
         this.dialogDepartmentType = this.schoolSettingForm.departmentType.split(',')
       }
       dialog.show = true
     },
-    fetchData() {
+    fetchData(type) {
+      if (type === 'search') this.page = 1
       this.BFD(getSchoolList({
         publicSchool: {
           ...this.select,
@@ -207,6 +231,7 @@ export default {
         }).then(() => {
           this.$message.success(`${this.rowId ? '编辑' : '添加'}成功~`)
           this.$refs.dialog.show = false
+          this.initOptions()
           this.fetchData()
         })
       }).catch(() => { })

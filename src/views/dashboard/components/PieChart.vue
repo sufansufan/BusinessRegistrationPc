@@ -1,5 +1,8 @@
 <template>
-  <div :class="className" :style="{height:height,width:width}" />
+  <div class="pie-chart">
+    <h4>{{ title }}</h4>
+    <div ref="pieChart" :class="className" :style="{height:height,width:width}"/>
+  </div>
 </template>
 
 <script>
@@ -9,6 +12,14 @@ import { debounce } from '@/utils'
 
 export default {
   props: {
+    title: {
+      type: String,
+      default: ''
+    },
+    chartData: {
+      type: Array,
+      default: () => ([])
+    },
     className: {
       type: String,
       default: 'chart'
@@ -24,7 +35,16 @@ export default {
   },
   data() {
     return {
-      chart: null
+      chart: null,
+      sidebarElm: null
+    }
+  },
+  watch: {
+    chartData: {
+      deep: true,
+      handler() {
+        this.setOptions()
+      }
     }
   },
   mounted() {
@@ -35,46 +55,67 @@ export default {
       }
     }, 100)
     window.addEventListener('resize', this.__resizeHandler)
+    // 监听侧边栏的变化
+    this.sidebarElm = document.getElementsByClassName('sidebar-container')[0]
+    this.sidebarElm && this.sidebarElm.addEventListener('transitionend', this.sidebarResizeHandler)
   },
   beforeDestroy() {
     if (!this.chart) {
       return
     }
     window.removeEventListener('resize', this.__resizeHandler)
+    this.sidebarElm && this.sidebarElm.removeEventListener('transitionend', this.sidebarResizeHandler)
     this.chart.dispose()
     this.chart = null
   },
   methods: {
+    sidebarResizeHandler(e) {
+      if (e.propertyName === 'width') {
+        this.__resizeHandler()
+      }
+    },
     initChart() {
-      this.chart = echarts.init(this.$el, 'macarons')
-
+      this.chart = echarts.init(this.$refs.pieChart, 'macarons')
+      this.setOptions()
+    },
+    setOptions() {
+      const names = this.chartData.map(item => item.name)
+      if (!names.length) return
       this.chart.setOption({
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b} : {c} ({d}%)'
+          formatter: '{b}: {c} ({d}%)'
         },
         legend: {
-          left: 'center',
-          bottom: '10',
-          data: ['Industries', 'Technology', 'Forex', 'Gold', 'Forecasts']
+          orient: 'vertical',
+          x: 'left',
+          data: names
         },
-        calculable: true,
         series: [
           {
-            name: 'WEEKLY WRITE ARTICLES',
+            name: '',
             type: 'pie',
-            roseType: 'radius',
-            radius: [15, 95],
-            center: ['50%', '38%'],
-            data: [
-              { value: 320, name: 'Industries' },
-              { value: 240, name: 'Technology' },
-              { value: 149, name: 'Forex' },
-              { value: 100, name: 'Gold' },
-              { value: 59, name: 'Forecasts' }
-            ],
-            animationEasing: 'cubicInOut',
-            animationDuration: 2600
+            radius: ['50%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+              normal: {
+                show: false,
+                position: 'center'
+              },
+              emphasis: {
+                show: true,
+                textStyle: {
+                  fontSize: '30',
+                  fontWeight: 'bold'
+                }
+              }
+            },
+            labelLine: {
+              normal: {
+                show: false
+              }
+            },
+            data: this.chartData
           }
         ]
       })
@@ -82,3 +123,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scope>
+.pie-chart {
+  h4 {
+    margin: 0 0 10px 0;
+  }
+}
+</style>

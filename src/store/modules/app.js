@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 import { setTheme } from '@/utils'
+import { editUserStatus } from '@/api/configure/userManagement'
 
 const fastNav = Cookies.get('fastNav')
 const app = {
@@ -60,8 +61,15 @@ const app = {
     toggleDrawer({ commit }, opened) {
       commit('TOGGLE_DRAWER', opened)
     },
-    changeTheme({ commit }, theme) {
-      commit('CHANGE_THEME', theme)
+    changeTheme({ commit }, { theme, id }) {
+      return editUserStatus({
+        Loading: true,
+        id,
+        operationType: 2,
+        skinId: theme
+      }).then(() => {
+        commit('CHANGE_THEME', theme)
+      })
     },
     toggleFastNav: ({ commit }) => {
       commit('TOGGLE_FAST_NAV')

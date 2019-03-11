@@ -20,9 +20,7 @@ export default {
   mixins: [tables],
   data() {
     return {
-      select: {
-
-      },
+      select: {},
       columns: [
         { label: '学员姓名', prop: 'studentName', width: '100' },
         { label: '学员编号', prop: 'studentNo', width: '100' },
@@ -42,7 +40,6 @@ export default {
         { label: '操作人', prop: 'updateUserName' },
         { label: '操作时间', prop: 'turnClassTime', width: '150' }
       ],
-
       dataList: []
     }
   },

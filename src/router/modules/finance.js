@@ -36,6 +36,14 @@ export default {
       }
     },
     {
+      path: 'signQuery',
+      component: () => import('@/views/finance/signQuery'),
+      name: 'SignQuery',
+      meta: {
+        title: '签到查询'
+      }
+    },
+    {
       path: 'refundAudit/:id',
       component: () => import('@/views/finance/audit'),
       name: 'RefundAudit',

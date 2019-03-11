@@ -1,81 +1,33 @@
 <template>
   <el-row :gutter="22" class="panel-group">
-    <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
+    <el-col
+      v-for="(chart, index) in chartList"
+      :key="index"
+      :xs="24"
+      :sm="12"
+      :lg="6"
+      class="card-panel-col"
+    >
       <div class="card-panel">
         <div>
-          <img :src="setImg('zongshou')">
+          <img :src="setImg(imgList[index].img)">
           <div>
             <p>
-              <count-num :num="423325522430" class="price-font"/>元
+              <count-num :num="chart.number" :to-fixed="imgList[index].toFixed" class="price-font"/>
+              {{ imgList[index].suffix }}
             </p>
-            <p>总收入</p>
+            <p>{{ chart.name }}</p>
           </div>
         </div>
         <div>
-          <el-progress :stroke-width="10" :show-text="false" :percentage="40"/>
+          <el-progress
+            :stroke-width="10"
+            :show-text="false"
+            :percentage="+(chart.yearOnYearGrowth.replace('%',''))"
+          />
           <div>
             <span>同比增长</span>
-            <span class="num">40%</span>
-          </div>
-        </div>
-      </div>
-    </el-col>
-    <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel">
-        <div>
-          <img :src="setImg('tuifei')">
-          <div>
-            <p>
-              <count-num :num="423325522430" class="price-font"/>元
-            </p>
-            <p>总退费</p>
-          </div>
-        </div>
-        <div>
-          <el-progress :stroke-width="10" :show-text="false" :percentage="20"/>
-          <div>
-            <span>同比增长</span>
-            <span class="num">20%</span>
-          </div>
-        </div>
-      </div>
-    </el-col>
-    <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel">
-        <div>
-          <img :src="setImg('zaidu')">
-          <div>
-            <p>
-              <count-num :num="123231" class="price-font"/>人
-            </p>
-            <p>在读学员总数</p>
-          </div>
-        </div>
-        <div>
-          <el-progress :stroke-width="10" :show-text="false" :percentage="40"/>
-          <div>
-            <span>同比增长</span>
-            <span class="num">40%</span>
-          </div>
-        </div>
-      </div>
-    </el-col>
-    <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel">
-        <div>
-          <img :src="setImg('queren')">
-          <div>
-            <p>
-              <count-num :num="423325522430" class="price-font"/>元
-            </p>
-            <p>确定收入</p>
-          </div>
-        </div>
-        <div>
-          <el-progress :stroke-width="10" :show-text="false" :percentage="40"/>
-          <div>
-            <span>同比增长</span>
-            <span class="num">40%</span>
+            <span class="num">{{ chart.yearOnYearGrowth }}</span>
           </div>
         </div>
       </div>
@@ -85,9 +37,37 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { getFirstStatistics } from '@/api'
 export default {
+  data() {
+    return {
+      imgList: [
+        {
+          img: 'zongshou',
+          suffix: '元'
+        },
+        {
+          img: 'tuifei',
+          suffix: '元'
+        },
+        {
+          img: 'zaidu',
+          suffix: '人',
+          toFixed: 0
+        },
+        {
+          img: 'queren',
+          suffix: '元'
+        }
+      ],
+      chartList: []
+    }
+  },
   computed: {
-    ...mapGetters(['theme'])
+    ...mapGetters(['theme', 'userInfo'])
+  },
+  created() {
+    this.fetchData()
   },
   methods: {
     setImg(name) {
@@ -95,6 +75,13 @@ export default {
     },
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type)
+    },
+    fetchData() {
+      getFirstStatistics({
+        adminOrganIds: this.userInfo.currentRoleId
+      }).then(res => {
+        this.chartList = res.data.list
+      })
     }
   }
 }

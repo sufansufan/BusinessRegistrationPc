@@ -20,12 +20,14 @@ export const getUserInfo = token => {
     }
   })
 }
+
 // 登出
 export const logout = () => {
   return request({
     url: '/user/logout'
   })
 }
+
 // 发送验证码
 export const getAuthenCode = data => {
   return request({
@@ -33,6 +35,7 @@ export const getAuthenCode = data => {
     data
   })
 }
+
 // 忘记或修改密码
 export const changePassword = data => {
   return request({

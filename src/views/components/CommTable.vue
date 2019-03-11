@@ -11,12 +11,13 @@
       border
       style="width: 100%"
       @current-change="(currentRow, oldCurrentRow) => $emit('selected', currentRow, oldCurrentRow)"
+      @selection-change="val => $emit('multipleSelection', val)"
     >
       <template
         v-for="({label, prop, className, width, fixed, type, pre, suf, separator = '/', _renderHeader, _child, _render, index: _i}, index) in tableRow"
       >
         <el-table-column
-          v-if="!_child && !type && !pre && !suf && !Array.isArray(prop) && prop !== 'operation' && !_renderHeader && !_render"
+          v-if="!_child && !type && !pre && !suf && !Array.isArray(prop) && prop !== 'operation' && type !== 'selection' && !_renderHeader && !_render"
           :key="index"
           :prop="prop"
           :class-name="className"
@@ -41,6 +42,13 @@
             </template>
           </template>
         </el-table-column>
+        <el-table-column
+          v-else-if="type === 'selection'"
+          :key="index"
+          :width="width || 55"
+          :fixed="fixed || false"
+          :type="type"
+        />
         <el-table-column
           v-else
           :key="index"

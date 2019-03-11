@@ -39,12 +39,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['theme'])
+    ...mapGetters(['theme', 'userInfo'])
   },
   methods: {
     changeTheme(theme, hidden) {
       if (theme === this.theme || hidden) return
-      this.$store.dispatch('changeTheme', theme).then(() => {
+      this.$store.dispatch('changeTheme', { theme, id: this.userInfo.id }).then(() => {
         this.$message.success('切换主题成功')
       })
     }

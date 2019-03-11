@@ -210,7 +210,8 @@ export default {
         const params = {
           Loading: true,
           ...this.student,
-          userCampusIds: this.userInfo.role[0].campusIds
+          userCampusIds: this.userInfo.role[0].campusIds,
+          studentSource: 1
         }
         params.entryScore.map(item => {
           delete item.label

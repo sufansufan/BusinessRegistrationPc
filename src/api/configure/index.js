@@ -27,3 +27,52 @@ export const getAppAccList = data =>
     url: '/a/sysManage/findStudentExpandList',
     data
   })
+
+// 修改app账号状态
+export const editStudentExpandStatus = data =>
+  request({
+    url: '/a/sysManage/editStudentExpandStatus',
+    data
+  })
+
+// 查询POS机信息
+export const getPosList = data =>
+  request({
+    url: '/a/sysManage/findPosList',
+    data
+  })
+
+// 删除pos机
+export const delPos = data =>
+  request({
+    url: '/a/sysManage/deletePos',
+    data
+  })
+
+// POS机启用停用
+export const editPosStatus = data =>
+  request({
+    url: '/a/sysManage/editPosStatus',
+    data
+  })
+
+// 新增编辑POS机
+export const addAndEditPos = data =>
+  request({
+    url: '/a/sysManage/addAndEditPos',
+    data
+  })
+
+// 查询POS机历史记录
+export const getPosHistoryList = data =>
+  request({
+    url: '/a/sysManage/findPosHistoryList',
+    data
+  })
+
+// 查询操作日志
+export const getSysOperationInfoList = data =>
+  request({
+    url: '/a/sysManage/findSysOperationInfoList',
+    data
+  })

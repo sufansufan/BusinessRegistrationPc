@@ -125,7 +125,7 @@
           />
         </div>
         <div>
-          <el-button type="primary" icon="el-icon-search" @click="fetchData">搜索</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="fetchData('search')">搜索</el-button>
         </div>
         <div>
           <el-button icon="el-icon-refresh" @click="resetSearch">重置搜索条件</el-button>
@@ -137,75 +137,89 @@
     </div>
     <comm-table :data="dataList" :columns="columns" :count="count" :single-selected="true">
       <div slot-scope="scope">
-        <el-button type="text" >删除</el-button>
-        <el-button type="text" >报名</el-button>
+        <el-button type="text">删除</el-button>
+        <el-button type="text">报名</el-button>
       </div>
     </comm-table>
-
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import tables from '@/mixin/tables'
-import CommTable from '@/views/components/CommTable'
+import { getSignupCandidateList } from '@/api/foreground/repairManagement'
 export default {
   name: 'RepairManagement',
-  components: {
-    CommTable
-  },
   mixins: [tables],
   data() {
     return {
       select: {
-
+        studentId: '',
+        particularYear: '',
+        season: '',
+        periods: '',
+        grade: '',
+        subject: '',
+        projectType: '',
+        classType: '',
+        department: '',
+        teacherName: '',
+        className: '',
+        studentNameAndPhone: '',
+        studentNo: ''
       },
       columns: [
-        { label: ' ', prop: 'selection', width: '55', fixed: 'left' },
-        { label: '学员姓名', prop: 'studentName' },
-        { label: '学员编号', prop: 'studentNo', width: '100' },
-        { label: '联系电话', prop: 'studentMobile' },
+        { type: 'selection', fixed: 'left' },
+        { label: '学员姓名', prop: 'name' },
+        { label: '学员编号', prop: 'no', width: '100' },
+        { label: '联系电话', prop: 'mobile' },
         { label: '班级名称', prop: 'className', width: '300' },
-        { label: '校区', prop: 'classSequence' },
-        { label: '老师', prop: 'classSequence' },
-        { label: '重复周期', prop: 'classSequence' },
-        { label: '时段', prop: 'classSequence' },
-        { label: '教室', prop: 'classSequence' },
-        { label: '价格', prop: 'classSequence' },
-        { label: '剩余/总课次', prop: 'classSequence' },
-        { label: '招生情况', prop: 'classSequence' },
-        { label: '缴费人数', prop: 'classSequence' },
-        { label: '剩余名额', prop: 'classSequence' },
-        { label: '候补人数', prop: 'currentStatusName' },
-        { label: '候补序号', prop: 'mendRegisterTime' },
-        { label: '操作人', prop: 'aciUpdateByName' },
-        { label: '操作时间', prop: 'aciUpdateDate' },
-        { label: '操作', prop: 'operation', width: '175', fixed: 'right' }
+        { label: '校区', prop: 'campusName' },
+        { label: '老师', prop: 'teacherName' },
+        { label: '重复周期', prop: 'classWeekDay' },
+        { label: '时段', prop: 'timeslotName' },
+        { label: '教室', prop: 'classRoomName' },
+        { label: '价格', prop: 'totalPrice' },
+        { label: '剩余/总课次', prop: ['leftTimes', 'totalTimes'] },
+        { label: '招生情况', prop: 'signupNum' },
+        { label: '缴费人数', prop: 'payNum' },
+        { label: '剩余名额', prop: 'leftNum' },
+        { label: '候补人数', prop: 'candidateNum' },
+        { label: '候补序号', prop: 'candidateNo' },
+        { label: '操作人', prop: 'updateName' },
+        { label: '操作时间', prop: 'updateDate' },
+        { label: '操作', prop: 'operation', width: '100', fixed: 'right' }
       ],
       campusProps: {
         value: 'id',
         label: 'name'
       },
-      dataList: [
-        { classSequence: '3213' }
-      ]
+      dataList: []
     }
   },
   computed: {
     ...mapGetters(['constant'])
   },
   created() {
-    this.$store.dispatch('getConstant', ['particular_year', 'campus', 'season', 'periods', 'grade', 'subject', 'timeslot_type', 'project_type', 'class_type', 'week_day_type', 'department_type']).then(() => {
-    })
+    this.$store.dispatch('getConstant', ['particular_year', 'campus', 'season', 'periods', 'grade', 'subject', 'timeslot_type', 'project_type', 'class_type', 'week_day_type', 'department_type'])
+    this.fetchData()
   },
   methods: {
-    fetchData() {
-
+    fetchData(type) {
+      if (type === 'search') this.page = 1
+      this.BFD(getSignupCandidateList({
+        page: this.page,
+        limit: this.limit,
+        ...this.select
+      }).then(res => {
+        const { count, list } = res.data
+        this.count = count
+        this.dataList = list
+      }))
     }
   }
 }
 </script>
 
 <style scoped>
-
 </style>

@@ -13,3 +13,10 @@ export const getIncomeConfirmListByCampus = data =>
     url: '/a/financeDateStatistics/findIncomeConfirmListByCampus',
     data
   })
+
+// 预估确认收入
+export const getPredictIncomeConfirmList = data =>
+  request({
+    url: '/a/financeDateStatistics/findPredictIncomeConfirmList',
+    data
+  })

@@ -173,10 +173,14 @@ export default {
             width: 158px;
             height: 206px;
             border: 1px solid #f2f2f2;
-            padding: 1px;
+            overflow: hidden;
             &,
             > img {
               border-radius: 5px;
+            }
+            > img {
+              max-height: 204px;
+              padding: 1px;
             }
           }
           span:first-child {

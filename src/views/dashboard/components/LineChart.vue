@@ -39,8 +39,8 @@ export default {
   watch: {
     chartData: {
       deep: true,
-      handler(val) {
-        this.setOptions(val)
+      handler() {
+        this.setOptions(this.chartData)
       }
     }
   },
@@ -78,10 +78,13 @@ export default {
         this.__resizeHandler()
       }
     },
-    setOptions({ expectedData, actualData } = {}) {
+    setOptions({ dates, list = [] }) {
+      if (!list.length) return
+      const titles = list.map(item => item.name)
+      const datas = list.map(item => item.data)
       this.chart.setOption({
         xAxis: {
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          data: dates,
           boundaryGap: false,
           axisTick: {
             show: false
@@ -107,10 +110,11 @@ export default {
           }
         },
         legend: {
-          data: ['expected', 'actual']
+          data: titles
         },
         series: [{
-          name: 'expected', itemStyle: {
+          name: titles[0],
+          itemStyle: {
             normal: {
               color: '#FF005A',
               lineStyle: {
@@ -121,12 +125,12 @@ export default {
           },
           smooth: true,
           type: 'line',
-          data: expectedData,
+          data: datas[0],
           animationDuration: 2800,
           animationEasing: 'cubicInOut'
         },
         {
-          name: 'actual',
+          name: titles[1],
           smooth: true,
           type: 'line',
           itemStyle: {
@@ -141,7 +145,7 @@ export default {
               }
             }
           },
-          data: actualData,
+          data: datas[1],
           animationDuration: 2800,
           animationEasing: 'quadraticOut'
         }]

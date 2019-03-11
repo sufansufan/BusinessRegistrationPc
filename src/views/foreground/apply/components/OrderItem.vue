@@ -62,14 +62,16 @@
               </div>
               <div v-else-if="item.prop === 'operation'">
                 <el-button
+                  :disabled="!o.className"
                   type="text"
                   @click="$router.push({path: `/foreground/apply/changeClass/${sid}?cid=${o.classId}&oid=${o.id}`})"
                 >转班</el-button>
                 <el-button
+                  :disabled="!o.className"
                   type="text"
                   @click="$router.push({path: `/foreground/apply/curriculumAdjust/${sid}?cid=${o.classId}`})"
                 >调课</el-button>
-                <el-button type="text">打印听课证</el-button>
+                <el-button :disabled="!o.className" type="text">打印听课证</el-button>
               </div>
               <div v-else-if="!o[item.prop]" class="is-empty">N/A</div>
               <div v-else-if="item.type">

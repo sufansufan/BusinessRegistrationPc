@@ -11,7 +11,7 @@
     <el-collapse v-model="collapseNames" accordion>
       <el-collapse-item title="切换身份" name="roles">
         <div class="change-roles">
-          <el-radio-group v-model="role" size="medium">
+          <el-radio-group v-model="role" size="medium" @change="roleChange">
             <el-radio-button v-for="item in userInfo.role" :key="item.id" :label="item.campusIds">
               <div>
                 <p>{{ item.campusNames[0] }}</p>
@@ -41,6 +41,8 @@
 import { mapGetters } from 'vuex'
 import ChangePwd from './ChangePwd'
 import Theme from './Theme'
+import { editUserStatus } from '@/api/configure/userManagement'
+import { deepClone } from '@/utils'
 export default {
   components: {
     ChangePwd,
@@ -61,10 +63,37 @@ export default {
   },
   created() {
     this.fastNavState = this.fastNav
+    this.role = this.userInfo.currentRoleId
   },
   methods: {
     toggleFastNav() {
       this.$store.dispatch('toggleFastNav')
+    },
+    roleChange(role) {
+      if (this.role !== this.userInfo.currentRoleId) {
+        this.$confirm('是否确认切换身份?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          closeOnClickModal: false,
+          type: 'warning'
+        }).then(() => {
+          editUserStatus({
+            Loading: true,
+            id: this.userInfo.id,
+            operationType: 5,
+            roleId: role
+          }).then(() => {
+            this.$router.replace({
+              path: '/redirect/index'
+            })
+            const newRole = deepClone(this.userInfo)
+            newRole.currentRoleId = role
+            this.$store.commit('SET_USERINFO', newRole)
+          })
+        }).catch(() => {
+          this.role = this.userInfo.currentRoleId
+        })
+      }
     }
   }
 }
