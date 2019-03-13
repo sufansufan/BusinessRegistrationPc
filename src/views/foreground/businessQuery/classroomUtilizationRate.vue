@@ -3,18 +3,7 @@
     <div class="select-tools">
       <div>
         <div>
-          <el-date-picker
-            v-model="times"
-            :picker-options="quickOptions"
-            type="daterange"
-            align="right"
-            unlink-panels
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="timestamp"
-            @change="val => parseDate(val, 'startDate', 'endDate')"
-          />
+          <Calendar :is-week="false" size="small" @fetchData="val => times = val"/>
         </div>
         <div>
           <el-cascader
@@ -25,6 +14,12 @@
             change-on-select
             @change="val => getLastVal(val, 'campusId')"
           />
+        </div>
+        <div>
+          <el-select v-model="select.denominatorType">
+            <el-option label="春季/秋季" value="1"/>
+            <el-option label="暑期/寒假" value="2"/>
+          </el-select>
         </div>
         <div>
           <el-button type="primary" icon="el-icon-search" @click="fetchData">搜索</el-button>
@@ -38,21 +33,20 @@
       <el-row v-loading="loading" :gutter="22">
         <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
-            <pie-chart :chart-data="pieChart.pay" title="缴费额"/>
+            <pie-chart :chart-data="pieChart.classRoom" title="教室利用率"/>
           </div>
         </el-col>
         <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
-            <pie-chart :chart-data="pieChart.refund" title="退费额"/>
+            <pie-chart :chart-data="pieChart.class" title="班级利用率"/>
           </div>
         </el-col>
         <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
-            <pie-chart :chart-data="pieChart.consult" title="咨询转化"/>
+            <pie-chart :chart-data="pieChart.count" title="教室数"/>
           </div>
         </el-col>
       </el-row>
-      <line-chart :chart-data="lineChartData"/>
     </div>
   </div>
 </template>
@@ -61,13 +55,13 @@
 import { mapGetters } from 'vuex'
 import tables from '@/mixin/tables'
 import PieChart from '@/views/dashboard/components/PieChart'
-import LineChart from '@/views/dashboard/components/LineChart'
-import { getRefundOrPayForECharts } from '@/api/foreground'
+import Calendar from '@/views/foreground/signManagement/components/Calendar'
+import { getClassroomUtilizationRatio } from '@/api/foreground'
 export default {
   name: 'PaymentRefundOverview',
   components: {
     PieChart,
-    LineChart
+    Calendar
   },
   mixins: [tables],
   data() {
@@ -77,36 +71,44 @@ export default {
       select: {
         startDate: '',
         endDate: '',
-        adminOrganIds: ''
+        adminOrganIds: '',
+        denominatorType: '1'
       },
       pieChart: {
-        pay: [],
-        refund: [],
-        consult: []
-      },
-      lineChartData: {}
+        classRoom: [],
+        class: [],
+        count: []
+      }
     }
   },
   computed: {
     ...mapGetters(['constant'])
   },
+  watch: {
+    times: {
+      deep: true,
+      handler() {
+        const [startDate = '', endDate = ''] = this.times
+        this.select.startDate = new Date(startDate)
+        this.select.endDate = new Date(endDate)
+      }
+    }
+  },
   created() {
     this.$store.dispatch('getConstant', 'campus')
-    this.fetchData()
+    this.$nextTick(() => {
+      this.fetchData()
+    })
   },
   methods: {
     fetchData() {
-      this.BFD(getRefundOrPayForECharts({
+      this.BFD(getClassroomUtilizationRatio({
         ...this.select
       }).then(res => {
-        const { dates, listPaied, listRefund, listConsultationTransformation, registerAndOrderNumlist } = res.data
-        this.pieChart.pay = listPaied
-        this.pieChart.refund = listRefund
-        this.pieChart.consult = listConsultationTransformation
-        this.lineChartData = {
-          dates,
-          list: registerAndOrderNumlist
-        }
+        const { listClassroomUtilizationRatio, listClassUtilizationRatio, listClassroomNum } = res.data
+        this.pieChart.classRoom = listClassroomUtilizationRatio
+        this.pieChart.class = listClassUtilizationRatio
+        this.pieChart.count = listClassroomNum
       }))
     }
   }
@@ -116,7 +118,7 @@ export default {
 <style lang="scss" scoped>
 .payment-refund-overview {
   &-charts {
-    padding: 20px 0;
+    padding: 100px 0;
   }
 }
 </style>

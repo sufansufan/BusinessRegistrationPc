@@ -40,7 +40,7 @@ export default {
         const { list } = this.chartData
         list && list.map(item => {
           this.yAxisData.push(item.date)
-          this.seriesData.push('100')
+          this.seriesData.push(item.predictIncomeConfirm)
         })
         this.initChart()
       },

@@ -135,10 +135,19 @@
         </div>
       </div>
     </div>
-    <comm-table :data="dataList" :columns="columns" :count="count" :single-selected="true">
-      <div slot-scope="scope">
-        <el-button type="text">删除</el-button>
-        <el-button type="text">报名</el-button>
+    <comm-table
+      v-loading="loading"
+      :data="dataList"
+      :columns="columns"
+      :count="count"
+      @multipleSelection="val => multipleSelection = val"
+    >
+      <div slot-scope="{row}">
+        <el-button type="text" @click="delSignupCandidate(row.id)">删除</el-button>
+        <el-button
+          type="text"
+          @click="$router.push({ path: '/foreground/apply/pay/' + row.studentId})"
+        >报名</el-button>
       </div>
     </comm-table>
   </div>
@@ -147,12 +156,14 @@
 <script>
 import { mapGetters } from 'vuex'
 import tables from '@/mixin/tables'
-import { getSignupCandidateList } from '@/api/foreground/repairManagement'
+import { getSignupCandidateList, delSignupCandidate } from '@/api/foreground/repairManagement'
+import { parseTime } from '@/utils'
 export default {
   name: 'RepairManagement',
   mixins: [tables],
   data() {
     return {
+      multipleSelection: [],
       select: {
         studentId: '',
         particularYear: '',
@@ -171,24 +182,24 @@ export default {
       columns: [
         { type: 'selection', fixed: 'left' },
         { label: '学员姓名', prop: 'name' },
-        { label: '学员编号', prop: 'no', width: '100' },
-        { label: '联系电话', prop: 'mobile' },
-        { label: '班级名称', prop: 'className', width: '300' },
+        { label: '学员编号', prop: 'no', width: 100 },
+        { label: '联系电话', prop: 'mobile', width: 100 },
+        { label: '班级名称', prop: 'className', width: 300 },
         { label: '校区', prop: 'campusName' },
         { label: '老师', prop: 'teacherName' },
         { label: '重复周期', prop: 'classWeekDay' },
-        { label: '时段', prop: 'timeslotName' },
+        { label: '时段', prop: 'timeslotName', width: 100 },
         { label: '教室', prop: 'classRoomName' },
-        { label: '价格', prop: 'totalPrice' },
-        { label: '剩余/总课次', prop: ['leftTimes', 'totalTimes'] },
-        { label: '招生情况', prop: 'signupNum' },
-        { label: '缴费人数', prop: 'payNum' },
-        { label: '剩余名额', prop: 'leftNum' },
-        { label: '候补人数', prop: 'candidateNum' },
-        { label: '候补序号', prop: 'candidateNo' },
+        { label: '价格', prop: 'totalPrice', type: 'num', pre: '￥' },
+        { label: '剩余/总课次', prop: ['leftTimes', 'totalTimes'], type: 'num', width: 130 },
+        { label: '招生情况', prop: 'signupNum', type: 'num' },
+        { label: '缴费人数', prop: 'payNum', type: 'num' },
+        { label: '剩余名额', prop: 'leftNum', type: 'num' },
+        { label: '候补人数', prop: 'candidateNum', type: 'num' },
+        { label: '候补序号', prop: 'candidateNo', type: 'num' },
         { label: '操作人', prop: 'updateName' },
-        { label: '操作时间', prop: 'updateDate' },
-        { label: '操作', prop: 'operation', width: '100', fixed: 'right' }
+        { label: '操作时间', prop: 'updateDate', width: 150 },
+        { label: '操作', prop: 'operation', width: 100, fixed: 'right' }
       ],
       campusProps: {
         value: 'id',
@@ -214,8 +225,26 @@ export default {
       }).then(res => {
         const { count, list } = res.data
         this.count = count
-        this.dataList = list
+        this.dataList = list.map(item => {
+          item.updateDate = parseTime(item.updateDate)
+          return item
+        })
       }))
+    },
+    delSignupCandidate(ids) {
+      this.$confirm('此操作将删除该记录, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delSignupCandidate({
+          Loading: true,
+          ids
+        }).then(() => {
+          this.$message.success('删除成功~')
+          this.fetchData()
+        })
+      }).catch(() => { })
     }
   }
 }

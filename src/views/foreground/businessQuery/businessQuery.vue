@@ -27,6 +27,26 @@
           />
         </div>
         <div>
+          <el-select v-model="select.grade" clearable placeholder="年级">
+            <el-option
+              v-for="item in constant.grade"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
+          <el-select v-model="select.subject" clearable placeholder="科目">
+            <el-option
+              v-for="item in constant.subject"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+        <div>
           <el-button type="primary" icon="el-icon-search" @click="fetchData">搜索</el-button>
         </div>
         <div>
@@ -35,23 +55,6 @@
       </div>
     </div>
     <div class="payment-refund-overview-charts">
-      <el-row v-loading="loading" :gutter="22">
-        <el-col :xs="24" :sm="24" :lg="8">
-          <div class="chart-wrapper">
-            <pie-chart :chart-data="pieChart.pay" title="缴费额"/>
-          </div>
-        </el-col>
-        <el-col :xs="24" :sm="24" :lg="8">
-          <div class="chart-wrapper">
-            <pie-chart :chart-data="pieChart.refund" title="退费额"/>
-          </div>
-        </el-col>
-        <el-col :xs="24" :sm="24" :lg="8">
-          <div class="chart-wrapper">
-            <pie-chart :chart-data="pieChart.consult" title="咨询转化"/>
-          </div>
-        </el-col>
-      </el-row>
       <line-chart :chart-data="lineChartData"/>
     </div>
   </div>
@@ -60,13 +63,11 @@
 <script>
 import { mapGetters } from 'vuex'
 import tables from '@/mixin/tables'
-import PieChart from '@/views/dashboard/components/PieChart'
 import LineChart from '@/views/dashboard/components/LineChart'
-import { getRefundOrPayForECharts } from '@/api/foreground'
+import { getStudentBusinessForECharts } from '@/api/foreground'
 export default {
   name: 'PaymentRefundOverview',
   components: {
-    PieChart,
     LineChart
   },
   mixins: [tables],
@@ -77,12 +78,9 @@ export default {
       select: {
         startDate: '',
         endDate: '',
-        adminOrganIds: ''
-      },
-      pieChart: {
-        pay: [],
-        refund: [],
-        consult: []
+        adminOrganIds: '',
+        grade: '',
+        subject: ''
       },
       lineChartData: {}
     }
@@ -91,21 +89,18 @@ export default {
     ...mapGetters(['constant'])
   },
   created() {
-    this.$store.dispatch('getConstant', 'campus')
+    this.$store.dispatch('getConstant', ['campus', 'grade', 'subject'])
     this.fetchData()
   },
   methods: {
     fetchData() {
-      this.BFD(getRefundOrPayForECharts({
+      this.BFD(getStudentBusinessForECharts({
         ...this.select
       }).then(res => {
-        const { dates, listPaied, listRefund, listConsultationTransformation, registerAndOrderNumlist } = res.data
-        this.pieChart.pay = listPaied
-        this.pieChart.refund = listRefund
-        this.pieChart.consult = listConsultationTransformation
+        const { dates, list } = res.data
         this.lineChartData = {
           dates,
-          list: registerAndOrderNumlist
+          list
         }
       }))
     }

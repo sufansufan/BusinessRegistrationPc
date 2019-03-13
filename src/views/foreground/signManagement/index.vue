@@ -36,7 +36,7 @@
           </div>
         </div>
         <div class="select-btn">
-          <calendar ref="calendar" @fetchData="fetchData"/>
+          <calendar ref="calendar" @weekSelected="fetchData"/>
         </div>
       </div>
       <div class="select-tools select-campus">
@@ -61,7 +61,6 @@
             </el-checkbox-group>
           </div>
         </div>
-
       </div>
       <comm-table :data="dataList" :columns="columns" :count="count"/>
     </template>
@@ -187,11 +186,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.sign-management-box{
-  .select-campus{
+.sign-management-box {
+  .select-campus {
     margin-top: -60px;
   }
-  .checkbox-list{
+  .checkbox-list {
     margin-top: 5px;
   }
 }

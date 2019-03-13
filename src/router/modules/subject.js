@@ -41,8 +41,7 @@ export default {
       name: 'RoutineAnalysis',
       meta: {
         title: '常规分析'
-      },
-      hidden: true
+      }
     },
     {
       path: 'discountCoupon',
@@ -50,7 +49,27 @@ export default {
       name: 'DiscountCoupon',
       meta: {
         title: '优惠券管理'
-      }
+      },
+      children: [
+        {
+          path: 'add',
+          component: () => import('@/views/subject/discountCoupon/add'),
+          name: 'AddCouponer',
+          meta: {
+            title: '发放管理-新增'
+          },
+          hidden: true
+        },
+        {
+          path: 'check/:id',
+          component: () => import('@/views/subject/discountCoupon/check'),
+          name: 'CheckCouponer',
+          meta: {
+            title: '发放管理-查看'
+          },
+          hidden: true
+        }
+      ]
     }
   ]
 }

@@ -141,6 +141,33 @@ export default {
           }
         },
         {
+          path: 'query',
+          component: () =>
+            import('@/views/foreground/businessQuery/businessQuery'),
+          name: 'BusinessVolumeQuery',
+          meta: {
+            title: '业务量查询'
+          }
+        },
+        {
+          path: 'queryList',
+          component: () =>
+            import('@/views/foreground/businessQuery/businessQueryList'),
+          name: 'BusinessVolumeQueryList',
+          meta: {
+            title: '业务量查询列表'
+          }
+        },
+        {
+          path: 'classRoom',
+          component: () =>
+            import('@/views/foreground/businessQuery/classroomUtilizationRate'),
+          name: 'ClassroomUtilizationRate',
+          meta: {
+            title: '教室利用率'
+          }
+        },
+        {
           path: 'refundQuery',
           component: () =>
             import('@/views/foreground/businessQuery/refundQuery'),

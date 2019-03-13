@@ -2,32 +2,42 @@
   <div class="calendar-box">
     <div>
       <div class="up-week">
-        <el-button size="big" icon="el-icon-arrow-left" @click="weekBtn('up')">上一周</el-button>
+        <el-button :size="size" icon="el-icon-arrow-left" @click="weekBtn('up')">上一周</el-button>
       </div>
       <div class="select-week">
         <el-date-picker
           ref="selectWeek"
           v-model="date"
+          :size="size"
           type="date"
-          size="big"
           placeholder="选择日期"
           style="width: 340px;"
-          @change="weekChange"/>
-        <div class="select-week-mask" @click="weekMask">
-          {{ rangeDate && rangeDate[0] }} 至 {{ rangeDate && rangeDate[1] }}
-        </div>
+          @change="weekChange"
+        />
+        <div
+          :class="{ 'select-week-mask': true, small: size !== 'big'}"
+          @click="weekMask"
+        >{{ rangeDate && rangeDate[0] }} 至 {{ rangeDate && rangeDate[1] }}</div>
       </div>
       <div class="down-week">
-        <el-button size="big" @click="weekBtn('down')">下一周 <i class="el-icon-arrow-right el-icon--right"/></el-button>
+        <el-button :size="size" @click="weekBtn('down')">
+          下一周
+          <i class="el-icon-arrow-right el-icon--right"/>
+        </el-button>
       </div>
     </div>
-    <div class="calendar-list">
+    <div v-if="isWeek" class="calendar-list">
       <ul>
-        <li v-for="(item,index) in weekDate" :key="item.date" :ref="'week'+index" @click="weekClick(item,index)">
+        <li
+          v-for="(item,index) in weekDate"
+          :key="item.date"
+          :ref="'week'+index"
+          @click="weekClick(item,index)"
+        >
           <strong>{{ item.week }}</strong>
           <span>{{ item.date }}</span>
           <div class="correct">
-            <div />
+            <div/>
             <i class="el-icon-check"/>
           </div>
         </li>
@@ -39,12 +49,22 @@
 <script>
 import { parseTime } from '@/utils'
 export default {
+  props: {
+    size: {
+      type: String,
+      default: 'big'
+    },
+    isWeek: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       date: new Date(),
       rangeDate: [],
       weekDate: [],
-      week: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      week: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
       startDay: '',
       endDay: ''
     }
@@ -56,31 +76,47 @@ export default {
     weekMask() {
       this.$refs.selectWeek.focus()
     },
-    weekChange(val) {
+    addDate(date, n) {
+      date.setDate(date.getDate() + n)
+      return date
+    },
+    getDate(date) {
+      return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() }
+    },
+    formatDate(date) {
+      const dateObj = this.getDate(date)
+      const { year, month, day } = dateObj
+      const week = this.week[date.getDay()]
+      return {
+        date: year + '-' + month + '-' + day,
+        week
+      }
+    },
+    weekChange(date, num) {
       this.rangeDate = []
       this.weekDate = []
-      const day = new Date(val).getDay()
-      if (day === 0) {
-        this.startDay = new Date(val).getTime() - 3600000 * 6 * 24
-        this.endDay = new Date(val).getTime()
-      } else {
-        this.startDay = new Date(val).getTime() - 3600000 * (day - 1) * 24
-        this.endDay = new Date(val).getTime() + 3600000 * (7 - day) * 24
+      const weekList = []
+      const day = date.getDay() - 1
+      const sunday = this.addDate(date, day * -1)
+      for (var i = 0; i < 7; i++) {
+        weekList.push(this.formatDate(i === 0 ? sunday : this.addDate(sunday, 1)))
       }
-      this.rangeDate[0] = parseTime(this.startDay, 'y-m-d')
-      this.rangeDate[1] = parseTime(this.endDay, 'y-m-d')
-      for (let i = 0; i < 7; i++) {
-        this.weekDate.push({
-          week: this.week[i],
-          date: parseTime(this.startDay + 3600000 * i * 24, 'm-d'),
-          yearDate: parseTime(this.startDay + 3600000 * i * 24, 'y-m-d')
-        })
-      }
-      this.$emit('fetchData')
+      this.startDay = weekList[0].date
+      this.endDay = weekList[6].date
+      this.rangeDate[0] = this.startDay
+      this.rangeDate[1] = this.endDay
+      this.weekDate = weekList.map(item => {
+        const { week, date } = item
+        return {
+          week,
+          date: parseTime(date, 'm-d'),
+          yearDate: new Date(date)
+        }
+      })
+      this.$emit('fetchData', this.rangeDate)
     },
     weekBtn(type) {
-      this.date = type === 'up' ? new Date(this.date).getTime() - 3600000 * 24 * 6 : new Date(this.date).getTime() + 3600000 * 24 * 6
-      this.weekChange(this.date)
+      this.weekChange(this.addDate(this.weekDate[0].yearDate, type === 'up' ? -7 : 7))
     },
     weekClick(item, index) {
       for (let i = 0; i < 7; i++) {
@@ -89,58 +125,58 @@ export default {
       }
       this.$refs['week' + index][0].classList.add('act-border')
       this.$refs['week' + index][0].children[2].style.display = 'block'
-      this.$emit('fetchData', item.yearDate)
+      this.$emit('weekSelected', item.yearDate)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.calendar-box{
-  .calendar-list{
-    & > ul > .act-border{
+.calendar-box {
+  .calendar-list {
+    & > ul > .act-border {
       color: #030303;
     }
   }
 }
 </style>
 <style lang="scss">
-.calendar-box{
-  .el-date-editor:not(.is-active){
+.calendar-box {
+  .el-date-editor:not(.is-active) {
     border: none !important;
   }
-  & > div:first-child{
+  & > div:first-child {
     display: flex;
-    .el-input__inner{
+    .el-input__inner {
       border-radius: 0px;
       border-right: none !important;
       border-left: none !important;
       text-align: center;
     }
-    .up-week{
-      .el-button{
+    .up-week {
+      .el-button {
         border-top-right-radius: 0px !important;
         border-bottom-right-radius: 0px !important;
       }
     }
-    .down-week{
-      .el-button{
+    .down-week {
+      .el-button {
         border-top-left-radius: 0px !important;
         border-bottom-left-radius: 0px !important;
       }
     }
-    .select-week{
+    .select-week {
       position: relative;
       .el-date-editor {
-        .el-range-input{
+        .el-range-input {
           color: #929292;
         }
       }
-      .el-range-separator{
+      .el-range-separator {
         color: #929292;
       }
-      &-mask{
-        position:absolute;
+      &-mask {
+        position: absolute;
         top: 1px;
         left: 0px;
         right: 0px;
@@ -150,11 +186,15 @@ export default {
         line-height: 38px;
         height: 38px;
         color: #5a5e66;
+        &.small {
+          height: 31px;
+          line-height: 31px;
+        }
       }
     }
   }
-  .calendar-list{
-    & > ul{
+  .calendar-list {
+    & > ul {
       list-style: none;
       margin-top: 10px;
       padding: 0px;
@@ -173,23 +213,23 @@ export default {
         & > span {
           font-size: 12px;
         }
-        .correct{
+        .correct {
           position: absolute;
           top: 26px;
           margin-left: 43px;
           display: none;
-          & > .el-icon-check{
+          & > .el-icon-check {
             position: absolute;
             top: 5px;
             left: 0px;
             color: #fff;
           }
-          & > div{
+          & > div {
             position: absolute;
             top: 4px;
             left: 1px;
             transform: rotate(225deg);
-            content: '';
+            content: "";
             border-top: 14px transparent solid;
             border-left: 14px transparent solid;
             border-bottom: 14px transparent solid;
@@ -200,5 +240,4 @@ export default {
     }
   }
 }
-
 </style>

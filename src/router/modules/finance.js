@@ -44,6 +44,30 @@ export default {
       }
     },
     {
+      path: 'stepRegionTurnClass',
+      component: () => import('@/views/finance/stepRegionTurnClass'),
+      name: 'StepRegionTurnClass',
+      meta: {
+        title: '跨区转班'
+      }
+    },
+    {
+      path: 'rateSetting',
+      component: () => import('@/views/finance/rateSetting'),
+      name: 'RateSetting',
+      meta: {
+        title: '费率设置'
+      }
+    },
+    {
+      path: 'financeAnalysis',
+      component: () => import('@/views/finance/financeAnalysis'),
+      name: 'FinanceAnalysis',
+      meta: {
+        title: '财务分析'
+      }
+    },
+    {
       path: 'refundAudit/:id',
       component: () => import('@/views/finance/audit'),
       name: 'RefundAudit',

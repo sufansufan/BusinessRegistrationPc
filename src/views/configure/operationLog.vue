@@ -37,7 +37,7 @@
           <el-button type="primary" icon="el-icon-search" @click="fetchData('search')">搜索</el-button>
         </div>
         <div>
-          <el-button icon="el-icon-refresh">重置搜索条件</el-button>
+          <el-button icon="el-icon-refresh" @click="resetSearch">重置搜索条件</el-button>
         </div>
         <div>
           <el-button type="primary" icon="el-icon-download">导出</el-button>
